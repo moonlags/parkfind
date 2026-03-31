@@ -1,6 +1,5 @@
 // TODO: visu izvadi latviesu valoda
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -8,24 +7,12 @@ import java.util.regex.Pattern;
 public class User implements CSVEncodable {
   private String email;
   private String password;
-  private boolean isAdmin;
-  private LocalDateTime lastLoginDate;
-  private LocalDateTime creationDate;
-  private int activity;
+  private boolean isAdmin; // TODO: enum(lietotajs, administrators)
 
-  private User(
-      String email,
-      String password,
-      boolean isAdmin,
-      LocalDateTime lastLoginDate,
-      LocalDateTime creationDate,
-      int activity) {
+  private User(String email, String password, boolean isAdmin) {
     this.email = email;
     this.password = password;
     this.isAdmin = isAdmin;
-    this.lastLoginDate = lastLoginDate;
-    this.creationDate = creationDate;
-    this.activity = activity;
   }
 
   // funkcija isAdmin atgriež boolean tipa vērtību isAdmin
@@ -36,10 +23,6 @@ public class User implements CSVEncodable {
   // funkcija email atgriež String tipa vērtību email
   public String email() {
     return email;
-  }
-
-  public void increaseActivity() {
-    activity++;
   }
 
   // funkcija login pieņem Scanner tipa vērtību scanner, HashMap<String, User> tipa vērtību users un
@@ -56,7 +39,6 @@ public class User implements CSVEncodable {
       throw new Exception("Nepareizs e-pasts vai parole!");
     }
 
-    user.lastLoginDate = LocalDateTime.now();
     return user;
   }
 
@@ -87,12 +69,14 @@ public class User implements CSVEncodable {
       throw new Exception("Paroles nesakrit");
     }
 
-    User user = new User(email, pwd, false, LocalDateTime.now(), LocalDateTime.now(), 0);
+    User user = new User(email, pwd, false);
 
     users.put(email, user);
     return user;
   }
 
+  // funkcija changePassword pieņem Scanner tipa vērtību scanner, HashMap<String, User> tipa vērtību
+  // users
   public void changePassword(Scanner scanner, HashMap<String, User> users) throws Exception {
     System.out.print("Ievadi pasreizejo paroli: ");
     String curr_pwd = scanner.nextLine();
@@ -140,31 +124,12 @@ public class User implements CSVEncodable {
 
   // funkcija toCSV atgriež String tipa vērtību
   public String toCSV() {
-    return email
-        + ","
-        + password
-        + ","
-        + isAdmin
-        + ","
-        + lastLoginDate
-        + ","
-        + creationDate
-        + ","
-        + activity
-        + "\n";
+    return email + "," + password + "," + isAdmin + "\n";
   }
 
   // funkcija print neko neatgriež un neko nepienem
   public void print(int width) {
-    System.out.printf(
-        "E-pasts: %-"
-            + width
-            + "s; Admins: %-5s; Pedejas iejas datums: %s; Izveides datums: %s; Aktivitate: %s\n",
-        email,
-        isAdmin,
-        lastLoginDate,
-        creationDate,
-        activity);
+    System.out.printf("E-pasts: %-" + width + "s; Admins: %-5s\n", email, isAdmin);
   }
 
   // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa vērtību
@@ -182,21 +147,6 @@ public class User implements CSVEncodable {
       isAdmin = Boolean.valueOf(fields[2]);
     }
 
-    LocalDateTime lastLoginDate = LocalDateTime.now();
-    if (fields.length >= 4) {
-      lastLoginDate = LocalDateTime.parse(fields[3]);
-    }
-
-    LocalDateTime creationDate = LocalDateTime.now();
-    if (fields.length >= 5) {
-      creationDate = LocalDateTime.parse(fields[4]);
-    }
-
-    int activity = 0;
-    if (fields.length >= 6) {
-      activity = Integer.valueOf(fields[5]);
-    }
-
-    return new User(email, name, isAdmin, lastLoginDate, creationDate, activity);
+    return new User(email, name, isAdmin);
   }
 }

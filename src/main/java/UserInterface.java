@@ -1,4 +1,6 @@
 // TODO: visu izvadi latviesu valoda
+// TODO: rajoni, autostavvietas, tarifi (tabulas)
+// TODO: hash passwords
 
 import java.util.ArrayList;
 import java.util.HashMap;
