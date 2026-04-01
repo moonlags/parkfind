@@ -9,25 +9,33 @@ import java.util.Scanner;
 public class UserInterface {
   private HandlerFn page;
   private User curr;
-  private HashMap<String, User> users;
   private Scanner scanner;
+
+  private HashMap<String, User> users;
   private FileHandler<User> userFile;
+
+  private HashMap<Integer, Park> parks;
+  private FileHandler<Park> parkFile;
 
   public UserInterface() {
     users = new HashMap<>();
+    parks = new HashMap<>();
+
     scanner = new Scanner(System.in);
+
     userFile = new FileHandler<>("data/users.csv", User::fromCSV);
+    parkFile = new FileHandler<>("data/parks.csv", Park::fromCSV);
+
     page = this::loginPage;
   }
 
   // funkcija userPage atgriež HandlerFn tipa vērtību
   private HandlerFn userPage() {
-    int choice =
-        Menu.printMenu(
-            scanner,
-            new String[] {
-              "Atrast autostāvvietu", "Samainīt paroli", "Dzēst kontu", "Atpakaļ", "Iziet"
-            });
+    int choice = Menu.printMenu(
+        scanner,
+        new String[] {
+            "Atrast autostāvvietu", "Samainīt paroli", "Dzēst kontu", "Atpakaļ", "Iziet"
+        });
 
     switch (choice) {
       case 1:
@@ -62,16 +70,15 @@ public class UserInterface {
 
   // funkcija adminPage atgriež HandlerFn tipa vērtību
   private HandlerFn adminPage() {
-    int choice =
-        Menu.printMenu(
-            scanner,
-            new String[] {
-              "Apskatīt lietotājus",
-              "Apskatīt autostāvvietas",
-              "Samainīt paroli",
-              "Atpakaļ",
-              "Iziet"
-            });
+    int choice = Menu.printMenu(
+        scanner,
+        new String[] {
+            "Apskatīt lietotājus",
+            "Apskatīt autostāvvietas",
+            "Samainīt paroli",
+            "Atpakaļ",
+            "Iziet"
+        });
 
     switch (choice) {
       case 1:
@@ -101,15 +108,15 @@ public class UserInterface {
 
   // funkcija usersActionsPage atgriež HandlerFn tipa vērtību
   private HandlerFn usersActionsPage() {
-    int choice =
-        Menu.printMenu(
-            scanner, new String[] {"Izvadīt lietotājus", "Dzēst lietotājus", "Atpakaļ", "Iziet"});
+    int choice = Menu.printMenu(
+        scanner, new String[] { "Izvadīt lietotājus", "Dzēst lietotājus", "Atpakaļ", "Iziet" });
 
     switch (choice) {
       case 1:
         int max_width = 0;
         for (String email : users.keySet()) {
-          if (email.length() > max_width) max_width = email.length();
+          if (email.length() > max_width)
+            max_width = email.length();
         }
 
         for (User user : users.values()) {
@@ -152,8 +159,7 @@ public class UserInterface {
   // funkcija loginPage atgriež HandlerFn tipa vērtību
   private HandlerFn loginPage() {
     curr = null;
-    int choice =
-        Menu.printMenu(scanner, new String[] {"Reģistrēties", "Ienākt savā kontā", "Iziet"});
+    int choice = Menu.printMenu(scanner, new String[] { "Reģistrēties", "Ienākt savā kontā", "Iziet" });
 
     switch (choice) {
       case 1:
@@ -179,7 +185,7 @@ public class UserInterface {
 
           saveUsers();
 
-          if (curr.isAdmin()) {
+          if (curr.role() == UserRole.Admin) {
             return this::adminPage;
           } else {
             return this::userPage;
@@ -208,6 +214,18 @@ public class UserInterface {
     }
   }
 
+  // funkcija loadParks neko nepieņem un neko neatgriež
+  private void loadParks() {
+    try {
+      ArrayList<Park> parkArray = parkFile.loadAll();
+      for (Park park : parkArray) {
+        parks.put(park.id(), park);
+      }
+    } catch (Exception e) {
+      System.err.println("Neizdevās ielādēt lietotājus: " + e);
+    }
+  }
+
   // funkcija saveUsers neko nepieņem un neko neatgriež
   private void saveUsers() {
     try {
@@ -222,6 +240,7 @@ public class UserInterface {
     System.out.println("Esi sveicināts Autostāvvietu meklēšanā!");
 
     loadUsers();
+    loadParks();
 
     while (true) {
       page = page.invoke();
