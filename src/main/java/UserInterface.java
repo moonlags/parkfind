@@ -26,7 +26,7 @@ public class UserInterface {
         Menu.printMenu(
             scanner,
             new String[] {
-              "Atrast autostavvietu", "Samainit paroli", "Dzest kontu", "Atpakal", "Iziet"
+              "Atrast autostāvvietu", "Samainīt paroli", "Dzēst kontu", "Atpakaļ", "Iziet"
             });
 
     switch (choice) {
@@ -36,7 +36,7 @@ public class UserInterface {
       case 2:
         try {
           curr.changePassword(scanner, users);
-          System.out.println("Paroles maina ir veiksmiga!");
+          System.out.println("Paroles maiņa ir veiksmiga!");
         } catch (Exception e) {
           System.out.println(e.getMessage());
           break;
@@ -46,14 +46,14 @@ public class UserInterface {
         break;
       case 3:
         users.remove(curr.email());
-        System.out.println("Jusu konts ir dzests!");
+        System.out.println("Jūsu konts ir dzēsts!");
 
         saveUsers();
         return this::loginPage;
       case 4:
         return this::loginPage;
       case 5:
-        System.out.println("Davaj poka!");
+        System.out.println("Visu labu!");
         System.exit(0);
     }
 
@@ -66,10 +66,10 @@ public class UserInterface {
         Menu.printMenu(
             scanner,
             new String[] {
-              "Apskatit lietotajus",
-              "Apskatit autostavvietas",
-              "Samainit paroli",
-              "Atpakal",
+              "Apskatīt lietotājus",
+              "Apskatīt autostāvvietas",
+              "Samainīt paroli",
+              "Atpakaļ",
               "Iziet"
             });
 
@@ -81,7 +81,7 @@ public class UserInterface {
       case 3:
         try {
           curr.changePassword(scanner, users);
-          System.out.println("Paroles maina ir veiksmiga!");
+          System.out.println("Paroles maiņa ir veiksmiga!");
         } catch (Exception e) {
           System.out.println(e.getMessage());
           break;
@@ -92,7 +92,7 @@ public class UserInterface {
       case 4:
         return this::loginPage;
       case 5:
-        System.out.println("Davaj poka!");
+        System.out.println("Visu labu");
         System.exit(0);
     }
 
@@ -103,7 +103,7 @@ public class UserInterface {
   private HandlerFn usersActionsPage() {
     int choice =
         Menu.printMenu(
-            scanner, new String[] {"Izvadit lietotajus", "Dzest lietotaju", "Atpakal", "Iziet"});
+            scanner, new String[] {"Izvadīt lietotājus", "Dzēst lietotājus", "Atpakaļ", "Iziet"});
 
     switch (choice) {
       case 1:
@@ -117,26 +117,26 @@ public class UserInterface {
         }
         break;
       case 2:
-        System.out.print("Ievadiet lietotaja e-pastu: ");
+        System.out.print("Ievadiet lietotāja e-pastu: ");
 
         String email = scanner.nextLine();
         if (!users.containsKey(email)) {
           System.out.println("E-pasts nav atrasts!");
           break;
         } else if (curr.email().equals(email)) {
-          System.out.println("Jus nevarat izdzest sevi!");
+          System.out.println("Jus nevarat izdzēst sevi!");
           break;
         }
 
         users.remove(email);
-        System.out.println("Lietotajs ir izdzests!");
+        System.out.println("Lietotājs ir izdzēsts!");
 
         saveUsers();
         break;
       case 3:
         return this::adminPage;
       case 4:
-        System.out.println("Davaj poka!");
+        System.out.println("Visu labu");
         System.exit(0);
     }
 
@@ -153,13 +153,13 @@ public class UserInterface {
   private HandlerFn loginPage() {
     curr = null;
     int choice =
-        Menu.printMenu(scanner, new String[] {"Registreties", "Ienakt sava konta", "Iziet"});
+        Menu.printMenu(scanner, new String[] {"Reģistrēties", "Ienākt savā kontā", "Iziet"});
 
     switch (choice) {
       case 1:
         try {
           curr = User.register(scanner, users);
-          System.out.println("Registracija ir veiksmiga!");
+          System.out.println("Reģistrācija ir veiksmīga!");
         } catch (Exception e) {
           System.out.println(e.getMessage());
           break;
@@ -168,14 +168,14 @@ public class UserInterface {
         try {
           userFile.appendOne(curr);
         } catch (Exception e) {
-          System.err.println("Failed to append user to file: " + e);
+          System.err.println("Neizdevās pievienot lietotāju failam: " + e);
         }
 
         return this::userPage;
       case 2:
         try {
           curr = User.login(scanner, users);
-          System.out.println("Darou obratno!");
+          System.out.println("Jūs esat veiksmīgi atgriezušies sistēmā!");
 
           saveUsers();
 
@@ -189,7 +189,7 @@ public class UserInterface {
         }
         break;
       case 3:
-        System.out.println("Davaj poka!");
+        System.out.println("Visu labu!");
         System.exit(0);
     }
 
@@ -204,7 +204,7 @@ public class UserInterface {
         users.put(user.email(), user);
       }
     } catch (Exception e) {
-      System.err.println("Failed to load users: " + e);
+      System.err.println("Neizdevās ielādēt lietotājus: " + e);
     }
   }
 
@@ -213,13 +213,13 @@ public class UserInterface {
     try {
       userFile.writeAll(users.values());
     } catch (Exception e) {
-      System.err.println("Failed to write users to file: " + e);
+      System.err.println("Neizdevās lietotāju pievienot failos: " + e);
     }
   }
 
   // funkcija run neko nepieņem un neko neatgriež
   public void run() {
-    System.out.println("Esi sveicinats Park Find'aa!");
+    System.out.println("Esi sveicināts Autostāvvietu meklēšanā!");
 
     loadUsers();
 
