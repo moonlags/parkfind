@@ -9,7 +9,7 @@ public class Menu {
       System.out.printf("%d - %s;\n", i + 1, choices[i]);
     }
     while (true) {
-      System.out.printf("Izvelies darbibu (%d-%d): ", 1, choices.length);
+      System.out.printf("Izvēlies darbību (%d-%d): ", 1, choices.length);
       try {
 
         int choice = Integer.valueOf(scanner.nextLine());
@@ -18,7 +18,7 @@ public class Menu {
           System.out.println("--------------------------------------------");
           return choice;
         }
-        System.out.println("Nav tadas darbibas!");
+        System.out.println("Nav tādas darbības!");
       } catch (NumberFormatException e) {
         System.out.println("Ievadi skaitli!");
       }

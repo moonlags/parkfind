@@ -56,25 +56,25 @@ public class User implements CSVEncodable {
     System.out.print("Ievadi e-pastu: ");
     String email = scanner.nextLine();
     if (!validateEmail(email)) {
-      throw new Exception("Nepareizs e-pasta formats!");
+      throw new Exception("Nepareizs e-pasta formāts!");
     }
 
     if (users.containsKey(email)) {
       throw new Exception("E-pasts ir jau izmantots!");
     }
 
-    System.out.print("Izdoma paroli: ");
+    System.out.print("Izdomā paroli: ");
     String pwd = scanner.nextLine();
     if (!validatePassword(pwd)) {
       throw new Exception(
-          "Parolei jabut vismazak 8 simbolu garai, saturet mazus burtus, lielus burtus un"
+          "Parolei jābūt vismaz 8 simbolu garai, saturēt mazos burtus, lielos burtus un"
               + " ciparus!");
     }
 
-    System.out.print("Ievadi paroli velreiz: ");
+    System.out.print("Ievadi paroli vēlreiz: ");
     String pwd2 = scanner.nextLine();
     if (!pwd.equals(pwd2)) {
-      throw new Exception("Paroles nesakrit");
+      throw new Exception("Paroles nesakrīt");
     }
 
     System.out.println("Ievadi tālruņa numuru: ");
@@ -88,24 +88,24 @@ public class User implements CSVEncodable {
   // funkcija changePassword pieņem Scanner tipa vērtību scanner, HashMap<String, User> tipa vērtību
   // users
   public void changePassword(Scanner scanner, HashMap<String, User> users) throws Exception {
-    System.out.print("Ievadi pasreizejo paroli: ");
+    System.out.print("Ievadi pašreizējo paroli: ");
     String curr_pwd = scanner.nextLine();
     if (!curr_pwd.equals(this.password)) {
       throw new Exception("Nepareiza parole!");
     }
 
-    System.out.print("Izdoma jaunu paroli: ");
+    System.out.print("Izdomā jaunu paroli: ");
     String pwd = scanner.nextLine();
     if (!validatePassword(pwd)) {
       throw new Exception(
-          "Parolei jabut vismazak 8 simbolu garai, saturet mazus burtus, lielus burtus un"
+          "Parolei jābut vismaz 8 simbolu garai, saturet mazos burtus, lielos burtus un"
               + " ciparus!");
     }
 
-    System.out.print("Ievadi paroli velreiz: ");
+    System.out.print("Ievadi paroli vēlreiz: ");
     String pwd2 = scanner.nextLine();
     if (!pwd.equals(pwd2)) {
-      throw new Exception("Paroles nesakrit");
+      throw new Exception("Paroles nesakrīt");
     }
 
     this.password = pwd;
