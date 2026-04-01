@@ -1,4 +1,4 @@
-public class Rate {
+public class Rate implements CSVEncodable {
     private int id;
     private int parkId;
     private AutoType autoType;
@@ -13,6 +13,10 @@ public class Rate {
         this.hourRate = hourRate;
         this.name = name;
         this.fullPrice = fullPrice;
+    }
+
+    public int parkId() {
+        return parkId;
     }
 
     // funkcija toCSV atgriež String tipa vērtību
@@ -35,10 +39,11 @@ public class Rate {
         }
         int id = Integer.valueOf(fields[0]);
         int parkId = Integer.valueOf(fields[1]);
-        AutoType autoType = fields[1];
-        String address = fields[2];
-        String district = fields[3];
+        AutoType autoType = AutoType.values()[Integer.valueOf(fields[2])];
+        float hourRate = Float.valueOf(fields[3]);
+        String name = fields[4];
+        float fullPrice = Float.valueOf(fields[5]);
 
-        return new Park(id, name, address, district);
+        return new Rate(id, parkId, autoType, hourRate, name, fullPrice);
     }
 }

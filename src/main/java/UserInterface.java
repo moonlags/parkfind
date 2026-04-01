@@ -17,14 +17,19 @@ public class UserInterface {
   private HashMap<Integer, Park> parks;
   private FileHandler<Park> parkFile;
 
+  private HashMap<Integer, ArrayList<Rate>> rates;
+  private FileHandler<Rate> rateFile;
+
   public UserInterface() {
     users = new HashMap<>();
     parks = new HashMap<>();
+    rates = new HashMap<>();
 
     scanner = new Scanner(System.in);
 
     userFile = new FileHandler<>("data/users.csv", User::fromCSV);
     parkFile = new FileHandler<>("data/parks.csv", Park::fromCSV);
+    rateFile = new FileHandler<>("data/rates.csv", Rate::fromCSV);
 
     page = this::loginPage;
   }
@@ -222,7 +227,23 @@ public class UserInterface {
         parks.put(park.id(), park);
       }
     } catch (Exception e) {
-      System.err.println("Neizdevās ielādēt lietotājus: " + e);
+      System.err.println("Neizdevās ielādēt autostāvvietu: " + e);
+    }
+  }
+
+  // funkcija loadRates neko nepieņem un neko neatgriež
+  // TODO
+  private void loadRates() {
+    try {
+      ArrayList<Rate> rateArray = rateFile.loadAll();
+      for (Rate rate : rateArray) {
+        if (!rates.containsKey(rate.parkId())) {
+          rates.put(rate.parkId(), new ArrayList<>());
+        }
+        rates.get(rates.)
+      }
+    } catch (Exception e) {
+      System.err.println("Neizdevās ielādēt tarifu: " + e);
     }
   }
 
