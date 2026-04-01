@@ -219,7 +219,7 @@ public class UserInterface {
 
   // funkcija run neko nepieņem un neko neatgriež
   public void run() {
-    System.out.println("Esi sveicinats Park Find'aa!");
+    System.out.println("Esi sveicināts Park Find'aa!");
 
     loadUsers();
 

@@ -4,20 +4,28 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+enum UserRole {
+  User,
+  Admin
+}
+
 public class User implements CSVEncodable {
   private String email;
   private String password;
-  private boolean isAdmin; // TODO: enum(lietotajs, administrators)
+  private UserRole role;
+  private String phoneNumber;
+  private AutoType autoType;
 
-  private User(String email, String password, boolean isAdmin) {
+  private User(String email, String password, UserRole role, String phoneNumber) {
     this.email = email;
     this.password = password;
-    this.isAdmin = isAdmin;
+    this.role = role;
+    this.phoneNumber = phoneNumber;
   }
 
-  // funkcija isAdmin atgriež boolean tipa vērtību isAdmin
-  public boolean isAdmin() {
-    return isAdmin;
+  // funkcija role atgriež UserRole tipa vērtību role
+  public UserRole role() {
+    return role;
   }
 
   // funkcija email atgriež String tipa vērtību email
@@ -69,7 +77,9 @@ public class User implements CSVEncodable {
       throw new Exception("Paroles nesakrit");
     }
 
-    User user = new User(email, pwd, false);
+    System.out.println("Ievadi tālruņa numuru: ");
+
+    User user = new User(email, pwd, UserRole.User);
 
     users.put(email, user);
     return user;
@@ -124,17 +134,17 @@ public class User implements CSVEncodable {
 
   // funkcija toCSV atgriež String tipa vērtību
   public String toCSV() {
-    return email + "," + password + "," + isAdmin + "\n";
+    return email + "," + password + "," + role + "\n";
   }
 
   // funkcija print neko neatgriež un neko nepienem
   public void print(int width) {
-    System.out.printf("E-pasts: %-" + width + "s; Admins: %-5s\n", email, isAdmin);
+    System.out.printf("E-pasts: %-" + width + "s; Loma: %-5s\n", email, role);
   }
 
   // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa vērtību
   public static User fromCSV(String csvdata) throws Exception {
-    // email,password,isAdmin,lastLoginDate,creationDate,activity
+    // email,password,role
     String[] fields = csvdata.split(",");
     if (fields.length < 2) {
       throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 2");
@@ -142,11 +152,11 @@ public class User implements CSVEncodable {
     String email = fields[0];
     String name = fields[1];
 
-    boolean isAdmin = false;
+    UserRole role = UserRole.User;
     if (fields.length >= 3) {
-      isAdmin = Boolean.valueOf(fields[2]);
+      role = UserRole.valueOf(fields[2]);
     }
 
-    return new User(email, name, isAdmin);
+    return new User(email, name, role);
   }
 }
