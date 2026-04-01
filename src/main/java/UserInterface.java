@@ -1,10 +1,14 @@
-// TODO: visu izvadi latviesu valoda
-// TODO: rajoni, autostavvietas, tarifi (tabulas)
 // TODO: hash passwords
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+
+@FunctionalInterface
+interface HandlerFn {
+  // funkcija invoke atgriež HandlerFn tipa vērtību
+  HandlerFn invoke();
+}
 
 public class UserInterface {
   private HandlerFn page;
@@ -240,7 +244,7 @@ public class UserInterface {
         if (!rates.containsKey(rate.parkId())) {
           rates.put(rate.parkId(), new ArrayList<>());
         }
-        rates.get(rates.)
+        rates.get(rate.parkId()).add(rate);
       }
     } catch (Exception e) {
       System.err.println("Neizdevās ielādēt tarifu: " + e);
@@ -262,6 +266,7 @@ public class UserInterface {
 
     loadUsers();
     loadParks();
+    loadRates();
 
     while (true) {
       page = page.invoke();

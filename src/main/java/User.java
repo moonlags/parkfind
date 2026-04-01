@@ -1,5 +1,3 @@
-// TODO: visu izvadi latviesu valoda
-
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -92,6 +90,7 @@ public class User implements CSVEncodable {
     if (phoneNumber.charAt(0) != '+' || phoneNumber.length() != 12) {
       throw new Exception("Nepareizs tālruņa numura formāts!");
     }
+    // TODO: add verification that phone number doesnt already exist
 
     User user = new User(email, pwd, UserRole.User, phoneNumber, AutoType.Any);
 
@@ -143,7 +142,7 @@ public class User implements CSVEncodable {
 
   // funkcija toCSV atgriež String tipa vērtību
   public String toCSV() {
-    return email + "," + password + "," + role.ordinal() + "," + phoneNumber + "," + autoType.ordinal() + "\n";
+    return email + "," + password + "," + role.name() + "," + phoneNumber + "," + autoType.name() + "\n";
   }
 
   // funkcija print neko neatgriež un neko nepienem
@@ -165,8 +164,7 @@ public class User implements CSVEncodable {
 
     UserRole role = UserRole.User;
     if (fields.length >= 3) {
-      int i = Integer.valueOf(fields[2]);
-      role = UserRole.values()[i];
+      role = UserRole.valueOf(fields[2]);
     }
 
     String phoneNumber = "";
@@ -176,8 +174,7 @@ public class User implements CSVEncodable {
 
     AutoType autoType = AutoType.Any;
     if (fields.length >= 5) {
-      int i = Integer.valueOf(fields[4]);
-      autoType = AutoType.values()[i];
+      autoType = AutoType.valueOf(fields[4]);
     }
 
     return new User(email, name, role, phoneNumber, autoType);

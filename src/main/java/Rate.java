@@ -1,4 +1,6 @@
 public class Rate implements CSVEncodable {
+    // TODO: under question, better add starttime, endtime, 7 bit integer for
+    // weekdays and hoiday boolean
     private int id;
     private int parkId;
     private AutoType autoType;
@@ -21,7 +23,7 @@ public class Rate implements CSVEncodable {
 
     // funkcija toCSV atgriež String tipa vērtību
     public String toCSV() {
-        return id + "," + parkId + "," + autoType.ordinal() + "," + hourRate + "," + name + "," + fullPrice + "\n";
+        return id + "," + parkId + "," + autoType.name() + "," + hourRate + "," + name + "," + fullPrice + "\n";
     }
 
     // funkcija print neko neatgriež un neko nepienem
@@ -39,7 +41,7 @@ public class Rate implements CSVEncodable {
         }
         int id = Integer.valueOf(fields[0]);
         int parkId = Integer.valueOf(fields[1]);
-        AutoType autoType = AutoType.values()[Integer.valueOf(fields[2])];
+        AutoType autoType = AutoType.valueOf(fields[2]);
         float hourRate = Float.valueOf(fields[3]);
         String name = fields[4];
         float fullPrice = Float.valueOf(fields[5]);
