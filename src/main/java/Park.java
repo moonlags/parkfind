@@ -15,6 +15,26 @@ public class Park implements CSVEncodable {
         return id;
     }
 
+    public String name() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String toString() {
+        return name + "; " + address + "; " + district;
+    }
+
     // funkcija toCSV atgriež String tipa vērtību
     public String toCSV() {
         return id + "," + name + "," + address + "," + district + "\n";

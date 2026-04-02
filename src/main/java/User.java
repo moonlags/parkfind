@@ -85,7 +85,7 @@ public class User implements CSVEncodable {
       throw new Exception("Paroles nesakrīt!");
     }
 
-    System.out.print("Ievadi tālruņa numuru: ");
+    System.out.print("Ievadi tālruņa numuru (piem. +37121234567): ");
     String phoneNumber = scanner.nextLine();
     if (phoneNumber.charAt(0) != '+' || phoneNumber.length() != 12) {
       throw new Exception("Nepareizs tālruņa numura formāts!");

@@ -1,21 +1,23 @@
 import java.util.Scanner;
+import java.util.List;
 
 public class Menu {
-  // funkcija printMenu pieņem Scanner tipa vērtību scanner, String[] tipa vērtību choices un
+  // funkcija printMenu pieņem Scanner tipa vērtību scanner, String[] tipa vērtību
+  // choices un
   // atgriež int tipa vērtību choice
-  static int printMenu(Scanner scanner, String[] choices) {
+  static int printMenu(Scanner scanner, List<String> choices) {
     System.out.println();
-    for (int i = 0; i < choices.length; i++) {
-      System.out.printf("%d - %s;\n", i + 1, choices[i]);
+    for (int i = 0; i < choices.size(); i++) {
+      System.out.printf("%d - %s;\n", i + 1, choices.get(i));
     }
     while (true) {
-      System.out.printf("Izvēlies darbību (%d-%d): ", 1, choices.length);
+      System.out.printf("Izvēlies darbību (%d-%d): ", 1, choices.size());
       try {
 
         int choice = Integer.valueOf(scanner.nextLine());
 
-        if (choice >= 1 && choice <= choices.length) {
-          System.out.println("--------------------------------------------");
+        if (choice >= 1 && choice <= choices.size()) {
+          Utils.clearConsole();
           return choice;
         }
         System.out.println("Nav tādas darbības!");
