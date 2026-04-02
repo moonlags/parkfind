@@ -1,4 +1,4 @@
-public class krasas {
+public class Color {
 
     // ANSI bēgšanas kodi (escape codes), kas liek terminālim mainīt teksta krāsu
     public static final String RESET = "\u001B[0m";
@@ -15,24 +15,20 @@ public class krasas {
     public static final String REVERSED = "\u001B[7m";
     public static final String BG_RED = "\u001B[41m";
 
-    // funkcija main pieņem String[] tipa vērtību argumenti un neatgriež nekādu vērtību
-    public static void main(String[] args) {
-        printRed("yooo");
-        printGreen("wasssup");
-        printYellow("zdarova");
-    }
-
-    // funkcija printRed pieņem String tipa vērtību sarkanāTekstaRinda un neatgriež nekādu vērtību
+    // funkcija printRed pieņem String tipa vērtību sarkanāTekstaRinda un neatgriež
+    // nekādu vērtību
     public static void printRed(String text) {
         System.out.println(RED + text + RESET);
     }
 
-    // funkcija printGreen pieņem String tipa vērtību zaļāTekstaRinda un neatgriež nekādu vērtību
+    // funkcija printGreen pieņem String tipa vērtību zaļāTekstaRinda un neatgriež
+    // nekādu vērtību
     public static void printGreen(String text) {
         System.out.println(GREEN + text + RESET);
     }
 
-    // funkcija printYellow pieņem String tipa vērtību dzeltenāTekstaRinda un neatgriež nekādu vērtību
+    // funkcija printYellow pieņem String tipa vērtību dzeltenāTekstaRinda un
+    // neatgriež nekādu vērtību
     public static void printYellow(String text) {
         System.out.println(YELLOW + text + RESET);
     }
