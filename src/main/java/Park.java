@@ -3,7 +3,9 @@ public class Park implements CSVEncodable {
     private String name;
     private String address;
     private String district;
-
+    
+    // funkcija Park pieņem int tipa vērtību id, String tipa vērtību name,
+    // String tipa vērtību address un String tipa vērtību district un atgriež Park tipa objektu
     public Park(int id, String name, String address, String district) {
         this.id = id;
         this.name = name;
@@ -11,26 +13,32 @@ public class Park implements CSVEncodable {
         this.district = district;
     }
 
+    // funkcija atgriež int tipa vērtību id
     public int id() {
         return id;
     }
 
+    // funkcija atgriež String tipa vērtību name
     public String name() {
         return name;
     }
 
+    // funkcija setName pieņem String tipa vērtību name
     public void setName(String name) {
         this.name = name;
     }
 
+    // funkcija setAddress pieņem String tipa vērtību address
     public void setAddress(String address) {
         this.address = address;
     }
 
+    // funkcija setDistrict pieņem String tipa vērtību district
     public void setDistrict(String district) {
         this.district = district;
     }
 
+    // funkcija toString atgriež String tipa vērtību
     public String toString() {
         return name + "; " + address + "; " + district;
     }
