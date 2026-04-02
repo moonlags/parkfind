@@ -19,6 +19,8 @@ public class Rate implements CSVEncodable {
     private int multipleCount;
     private byte weekDays;
 
+    // funkcija Rate pieņem int, int, AutoType, float, String, float tipa vērtības
+    // id, parkId, autoType, hourRate, name, fullPrice un neatgriež nekādu vērtību
     public Rate(int id, int parkId, AutoType autoType, RateType rateType, float price, LocalTime startTime,
             LocalTime endTime, int multipleCount, byte weekDays) {
         this.id = id;
@@ -32,6 +34,7 @@ public class Rate implements CSVEncodable {
         this.weekDays = weekDays;
     }
 
+    // funkcija parkId nepieņem nevienu vērtību un atgriež int tipa vērtību parkId
     public int parkId() {
         return parkId;
     }
@@ -40,7 +43,8 @@ public class Rate implements CSVEncodable {
         return id;
     }
 
-    // funkcija toCSV atgriež String tipa vērtību
+    // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību
+    // csvRinda
     public String toCSV() {
         return id + "," + parkId + "," + autoType.name() + "," + rateType.name() + "," + price + "," + startTime + ","
                 + endTime + "," + multipleCount + "," + weekDays + "\n";
@@ -52,20 +56,28 @@ public class Rate implements CSVEncodable {
         return super.toString();
     }
 
-    // funkcija print neko neatgriež un neko nepienem
+    // funkcija print pieņem int tipa vērtību tabulasPlatums un neatgriež nekādu
+    // vērtību
     // public void print(int width) {
+    // // Izmanto formatēto izvadi, lai dati konsolē izskatītos sakārtoti
+    // (izlīdzināti pēc platuma)
     // System.out.printf("Auto tips: %-14s; Cena par stundu: %d; Tarifa tips: %-" +
     // width + "s; Pilna cena: %d\n",
     // autoType, hourRate, name, fullPrice);
     // }
 
-    // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa
-    // vērtību
+    // funkcija fromCSV pieņem String tipa vērtību csvDati un atgriež Rate tipa
+    // vērtību jaunsTarifs
     public static Rate fromCSV(String csvdata) throws Exception {
+        // Sadala saņemto teksta rindu masīvā, izmantojot komatu kā atdalītāju
         String[] fields = csvdata.split(",");
+
+        // Pārbauda, vai rindā ir pietiekami daudz datu lauku, lai izveidotu objektu
         if (fields.length < 9) {
-            throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 6");
+            throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 9");
         }
+
+        // Konvertē teksta vērtības uz atbilstošajiem datu tipiem
         int id = Integer.valueOf(fields[0]);
         int parkId = Integer.valueOf(fields[1]);
         AutoType autoType = AutoType.valueOf(fields[2]);
