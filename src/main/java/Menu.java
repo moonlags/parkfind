@@ -5,9 +5,13 @@ public class Menu {
   // atgriež int tipa vērtību choice
   static int printMenu(Scanner scanner, String[] choices) {
     System.out.println();
+
+    // Izdrukā visas masīvā esošās izvēlnes iespējas, pievienojot tām numuru
     for (int i = 0; i < choices.length; i++) {
       System.out.printf("%d - %s;\n", i + 1, choices[i]);
     }
+
+    // Mūžīgais cikls nodrošina to, ka programma nebeidzas, kamēr nav saņemta derīga ievade
     while (true) {
       System.out.printf("Izvēlies darbību (%d-%d): ", 1, choices.length);
       try {
