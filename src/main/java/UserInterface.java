@@ -54,9 +54,10 @@ public class UserInterface {
         // TODO: implement
         break;
       case 2:
+        clearConsole();
         try {
           curr.changePassword(scanner, users);
-          Utils.clearConsole();
+          clearConsole();
           System.out.println("Paroles maiņa ir veiksmiga!");
         } catch (Exception e) {
           System.out.println(e.getMessage());
@@ -68,16 +69,16 @@ public class UserInterface {
       case 3:
         // TODO: check password
         users.remove(curr.email());
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Jūsu konts ir dzēsts!");
 
         saveUsers();
         return this::loginPage;
       case 4:
-        Utils.clearConsole();
+        clearConsole();
         return this::loginPage;
       case 5:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu!");
         System.exit(0);
     }
@@ -93,15 +94,16 @@ public class UserInterface {
 
     switch (choice) {
       case 1:
-        Utils.clearConsole();
+        clearConsole();
         return this::usersActionsPage;
       case 2:
-        Utils.clearConsole();
+        clearConsole();
         return this::parksActionsPage;
       case 3:
+        clearConsole();
         try {
           curr.changePassword(scanner, users);
-          Utils.clearConsole();
+          clearConsole();
           System.out.println("Paroles maiņa ir veiksmiga!");
         } catch (Exception e) {
           System.out.println(e.getMessage());
@@ -111,10 +113,10 @@ public class UserInterface {
         saveUsers();
         break;
       case 4:
-        Utils.clearConsole();
+        clearConsole();
         return this::loginPage;
       case 5:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu");
         System.exit(0);
     }
@@ -131,7 +133,7 @@ public class UserInterface {
 
     switch (choice) {
       case 1:
-        Utils.clearConsole();
+        clearConsole();
         int max_width = 0;
         for (String email : users.keySet()) {
           if (email.length() > max_width)
@@ -143,7 +145,7 @@ public class UserInterface {
         }
         break;
       case 2:
-        Utils.clearConsole();
+        clearConsole();
         System.out.print("Ievadiet lietotāja e-pastu: ");
 
         String email = scanner.nextLine();
@@ -161,10 +163,10 @@ public class UserInterface {
         saveUsers();
         break;
       case 3:
-        Utils.clearConsole();
+        clearConsole();
         return this::adminPage;
       case 4:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu");
         System.exit(0);
     }
@@ -184,13 +186,13 @@ public class UserInterface {
         // TODO:
         break;
       case 2:
-        Utils.clearConsole();
+        clearConsole();
         return this::parkListActionsPage;
       case 3:
-        Utils.clearConsole();
+        clearConsole();
         return this::adminPage;
       case 4:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu");
         System.exit(0);
     }
@@ -215,14 +217,14 @@ public class UserInterface {
 
     switch (choice) {
       case 1:
-        Utils.clearConsole();
+        clearConsole();
         return this::parksActionsPage;
       case 2:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu");
         System.exit(0);
       default:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Jūs izvēlējaties " + (choice - 2) + ". autostāvvietu!");
         chosenParkId = parkIds.get(choice - 2);
         return this::singleParkActionsPage;
@@ -241,7 +243,7 @@ public class UserInterface {
     Park temp = null;
     switch (choice) {
       case 1:
-        Utils.clearConsole();
+        clearConsole();
         System.out.print("Ievadiet jaunu nosaukumu: ");
         String newName = scanner.nextLine();
         temp = parks.get(chosenParkId);
@@ -251,7 +253,7 @@ public class UserInterface {
         System.out.println("Nosaukums ir izmainīts");
         break;
       case 2:
-        Utils.clearConsole();
+        clearConsole();
         System.out.print("Ievadiet jaunu adresi: ");
         String newAddress = scanner.nextLine();
         temp = parks.get(chosenParkId);
@@ -261,7 +263,7 @@ public class UserInterface {
         System.out.println("Adrese ir izmainīta");
         break;
       case 3:
-        Utils.clearConsole();
+        clearConsole();
         System.out.print("Ievadiet jaunu rajonu: ");
         String newDistrict = scanner.nextLine();
         temp = parks.get(chosenParkId);
@@ -271,10 +273,10 @@ public class UserInterface {
         System.out.println("Rajons ir izmainīts");
         break;
       case 4:
-        Utils.clearConsole();
+        clearConsole();
         return this::rateActionsPage;
       case 5:
-        Utils.clearConsole();
+        clearConsole();
         System.out.print("Vai tiešam dzēst (Jā/Nē)?: ");
         String y = scanner.nextLine();
 
@@ -287,11 +289,11 @@ public class UserInterface {
         System.out.println("Autostāvvieta dzēsta");
         return this::parksActionsPage;
       case 6:
-        Utils.clearConsole();
+        clearConsole();
         chosenParkId = -1;
         return this::parkListActionsPage;
       case 7:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu");
         System.exit(0);
     }
@@ -310,7 +312,7 @@ public class UserInterface {
         // TODO: pievienosanas funckija
         break;
       case 2:
-        Utils.clearConsole();
+        clearConsole();
         try {
           int id = Integer.valueOf(scanner.nextLine());
 
@@ -328,15 +330,15 @@ public class UserInterface {
           System.out.println("Ievadi pareizo tarifa ID!");
         }
       case 3:
-        Utils.clearConsole();
+        clearConsole();
         for (Rate rate : rates.get(chosenParkId)) {
           System.out.println(rate);
         }
       case 4:
-        Utils.clearConsole();
+        clearConsole();
         return this::singleParkActionsPage;
       case 5:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu");
         System.exit(0);
     }
@@ -354,9 +356,10 @@ public class UserInterface {
 
     switch (choice) {
       case 1:
-        Utils.clearConsole();
+        clearConsole();
         try {
           curr = User.register(scanner, users);
+          clearConsole();
           System.out.println("Reģistrācija ir veiksmīga!");
         } catch (Exception e) {
           System.out.println(e.getMessage());
@@ -371,9 +374,10 @@ public class UserInterface {
 
         return this::userPage;
       case 2:
-        Utils.clearConsole();
+        clearConsole();
         try {
           curr = User.login(scanner, users);
+          clearConsole();
           System.out.println("Jūs esat veiksmīgi atgriezušies sistēmā!");
 
           saveUsers();
@@ -388,7 +392,7 @@ public class UserInterface {
         }
         break;
       case 3:
-        Utils.clearConsole();
+        clearConsole();
         System.out.println("Visu labu!");
         System.exit(0);
     }
@@ -443,6 +447,12 @@ public class UserInterface {
     } catch (Exception e) {
       System.err.println("Neizdevās lietotāju pievienot failos: " + e);
     }
+  }
+
+  // funkcija clearConsole nepieņem parametrus un neatgriež nevienu vērtību
+  public static void clearConsole() {
+    System.out.print("\033[H\033[2J");
+    System.out.flush();
   }
 
   // funkcija run neko nepieņem un neko neatgriež
