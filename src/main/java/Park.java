@@ -16,15 +16,23 @@ public class Park implements CSVEncodable {
         this.district = district;
     }
 
-    public static Park enterNew(Scanner scanner, int id) {
+    // TODO: garumzimes
+    public static Park enterNew(Scanner scanner, int id) throws Exception {
+        System.out.println("Ievadiet autostavvietas datus vai \'iziet\'!");
         System.out.print("Ievadi nosaukumu: ");
         String name = scanner.nextLine();
+        if (name.equals("iziet"))
+            throw new Exception("Autostavvietas izveide ir aptureta!");
 
         System.out.print("Ievadi adresi: ");
         String address = scanner.nextLine();
+        if (address.equals("iziet"))
+            throw new Exception("Autostavvietas izveide ir aptureta!");
 
         System.out.print("Ievadi rajonu: ");
         String district = scanner.nextLine();
+        if (district.equals("iziet"))
+            throw new Exception("Autostavvietas izveide ir aptureta!");
 
         Park park = new Park(id, name, address, district);
 

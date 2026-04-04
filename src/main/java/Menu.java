@@ -22,7 +22,7 @@ public class Menu {
         int choice = Integer.valueOf(scanner.nextLine());
 
         if (choice >= 1 && choice <= choices.size()) {
-          Utils.clearConsole();
+          UserInterface.clearConsole();
           return choice;
         }
         System.out.println("Nav tādas darbības!");

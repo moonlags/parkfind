@@ -1,7 +1,11 @@
 import java.time.LocalTime;
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 enum RateType {
     PerHour,
+    DayPart,
     DayWhole,
     MonthWhole,
     MonthPart,
@@ -32,6 +36,118 @@ public class Rate implements CSVEncodable {
         this.endTime = endTime;
         this.multipleCount = multipleCount;
         this.weekDays = weekDays;
+    }
+
+    // TODO: garumzimes
+    public static Rate enterNew(Scanner scanner, int id, int parkId) throws Exception {
+        ArrayList<String> choices = new ArrayList<>(
+                Arrays.asList("Izveleties jebkuru auto tipu",
+                        "Izveleties elektro auto tipu", "Atpakal"));
+        int choice = Menu.printMenu(
+                scanner, choices);
+
+        AutoType autoType;
+        switch (choice) {
+            case 1:
+                autoType = AutoType.Any;
+            case 2:
+                autoType = AutoType.Electro;
+            case 3:
+                throw new Exception("Tarifa izveide ir aptureta!");
+            default:
+                autoType = AutoType.Any;
+        }
+
+        choices = new ArrayList<>(
+                Arrays.asList("Izveidot stundas tipa tarifu", "Izveidot dienas posma tipa tarifu",
+                        "Izveidot pilnas dienas tipa tarifu", "Izveidot pilna mēneša tipa tarifu",
+                        "Izveidot mēneša perioda tipa tarifu", "Izveidot vairāku dienu tipa tarifu", "Atpakal"));
+        choice = Menu.printMenu(
+                scanner, choices);
+
+        RateType rateType;
+        switch (choice) {
+            case 1:
+                rateType = RateType.PerHour;
+            case 2:
+                rateType = RateType.DayPart;
+            case 3:
+                rateType = RateType.DayWhole;
+            case 4:
+                rateType = RateType.MonthWhole;
+            case 5:
+                rateType = RateType.MonthPart;
+            case 6:
+                rateType = RateType.DaysMultiple;
+            case 7:
+                throw new Exception("Tarifa izveide ir aptureta!");
+            default:
+                rateType = RateType.PerHour;
+        }
+
+        System.out.print("Ievadi pilnu cenu: ");
+        float price;
+        try {
+            price = Float.valueOf(scanner.nextLine());
+        } catch (Exception e) {
+            throw new Exception("Cenai ir jabut realajam skaitlim!");
+        }
+
+        if (price < 0) {
+            throw new Exception("Cena nevar but negativa!");
+        }
+
+        System.out.print("Ievadi laiku, kad tarifs saka darboties (hh:mm): ");
+        LocalTime startTime;
+        try {
+            startTime = LocalTime.parse(scanner.nextLine());
+        } catch (Exception e) {
+            throw new Exception("Sakuma laiks nav pareizi ievadits!");
+        }
+
+        System.out.print("Ievadi laiku, kad tarifs beidz darboties (hh:mm): ");
+        LocalTime endTime;
+        try {
+            endTime = LocalTime.parse(scanner.nextLine());
+        } catch (Exception e) {
+            throw new Exception("Beigu laiks nav pareizi ievadits!");
+        }
+
+        int multipleCount = 0;
+        if (rateType == RateType.DaysMultiple) {
+            System.out.print("Ievadi dienu daudzumu: ");
+            try {
+                multipleCount = Integer.valueOf(scanner.nextLine());
+            } catch (Exception e) {
+                throw new Exception("Dienas daudzumam ir jabut naturalajam skaitlim");
+            }
+
+            if (multipleCount <= 0) {
+                throw new Exception("Dienu daudzumam ir jabut pozitivam!");
+            }
+        }
+
+        System.out.print("Ievadi nedelas dienas, kad tarifs ir aktivs (piem. \'1,5,7\'), vai \'visas\': ");
+        byte weekdays = 0;
+        String wdStr = scanner.nextLine();
+        if (wdStr.equals("visas")) {
+            wdStr = "1,2,3,4,5,6,7";
+        }
+
+        for (String dayStr : wdStr.split(",")) {
+            int day;
+            try {
+                day = Integer.valueOf(dayStr);
+            } catch (Exception e) {
+                throw new Exception("Nedelas dienas nav ievaditas korekti!");
+            }
+            if (day <= 0 || day > 7) {
+                throw new Exception("Diena " + day + " nav ievadita korekti!");
+            }
+            weekdays = (byte) (weekdays | 1 << (day - 1));
+        }
+
+        return new Rate(id, parkId, autoType, rateType, price, startTime, endTime, multipleCount, weekdays);
     }
 
     // funkcija parkId nepieņem nevienu vērtību un atgriež int tipa vērtību parkId

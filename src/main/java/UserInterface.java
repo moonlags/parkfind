@@ -187,9 +187,18 @@ public class UserInterface {
     switch (choice) {
       case 1:// TODO: garumzimes
         clearConsole();
-        Park park = Park.enterNew(scanner, newId);
-        newId++;
 
+        Park park;
+        try {
+          park = Park.enterNew(scanner, newId);
+          clearConsole();
+          System.out.println("Jauna autostavvieta ir veiksmigi izveidota!");
+        } catch (Exception e) {
+          System.out.println(e.getMessage());
+          break;
+        }
+
+        newId++;
         parks.put(park.id(), park);
 
         try {
@@ -198,7 +207,6 @@ public class UserInterface {
           System.err.println("Neizdevās pievienot autostavvietu failam: " + e);
         }
 
-        System.out.println("Jauna autostavvieta ir veiksmigi izveidota!");
         break;
       case 2:
         clearConsole();
@@ -330,19 +338,43 @@ public class UserInterface {
     int choice = Menu.printMenu(
         scanner, choices);
 
+    ArrayList<Rate> temp;
     switch (choice) {
+      // TODO: garumzimes
       case 1:
-        // TODO: pievienosanas funckija
+        clearConsole();
+
+        Rate rate;
+        try {
+          rate = Rate.enterNew(scanner, newId, chosenParkId);
+          clearConsole();
+          System.out.println("Jauns tarifs ir veiksmigi izveidots!");
+        } catch (Exception e) {
+          System.out.println(e.getMessage());
+          break;
+        }
+
+        newId++;
+        temp = rates.get(chosenParkId);
+        temp.add(rate);
+        rates.put(chosenParkId, temp);
+
+        try {
+          rateFile.appendOne(rate);
+        } catch (Exception e) {
+          System.err.println("Neizdevās pievienot tarifu failam: " + e);
+        }
+
         break;
       case 2:
         clearConsole();
         try {
           int id = Integer.valueOf(scanner.nextLine());
 
-          ArrayList<Rate> temp = rates.get(chosenParkId);
+          temp = rates.get(chosenParkId);
           int i = 0;
-          for (Rate rate : temp) {
-            if (rate.id() == id)
+          for (Rate el : temp) {
+            if (el.id() == id)
               temp.remove(i);
             i++;
           }
@@ -354,8 +386,8 @@ public class UserInterface {
         }
       case 3:
         clearConsole();
-        for (Rate rate : rates.get(chosenParkId)) {
-          System.out.println(rate);
+        for (Rate el : rates.get(chosenParkId)) {
+          System.out.println(el);
         }
       case 4:
         clearConsole();
@@ -488,6 +520,7 @@ public class UserInterface {
 
   // funkcija run neko nepieņem un neko neatgriež
   public void run() {
+    clearConsole();
     System.out.println("Esi sveicināts Autostāvvietu meklēšanā!");
 
     loadUsers();
