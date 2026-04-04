@@ -1,16 +1,34 @@
+import java.util.Scanner;
+
 public class Park implements CSVEncodable {
     private int id;
     private String name;
     private String address;
     private String district;
-    
+
     // funkcija Park pieņem int tipa vērtību id, String tipa vērtību name,
-    // String tipa vērtību address un String tipa vērtību district un atgriež Park tipa objektu
+    // String tipa vērtību address un String tipa vērtību district un atgriež Park
+    // tipa objektu
     public Park(int id, String name, String address, String district) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.district = district;
+    }
+
+    public static Park enterNew(Scanner scanner, int id) {
+        System.out.print("Ievadi nosaukumu: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Ievadi adresi: ");
+        String address = scanner.nextLine();
+
+        System.out.print("Ievadi rajonu: ");
+        String district = scanner.nextLine();
+
+        Park park = new Park(id, name, address, district);
+
+        return park;
     }
 
     // funkcija atgriež int tipa vērtību id

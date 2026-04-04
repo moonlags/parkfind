@@ -17,6 +17,8 @@ public class UserInterface {
 
   private int chosenParkId;
 
+  private int newId;
+
   private Scanner scanner;
 
   private HashMap<String, User> users;
@@ -40,6 +42,7 @@ public class UserInterface {
     rateFile = new FileHandler<>("data/rates.csv", Rate::fromCSV);
 
     page = this::loginPage;
+    newId = 1;
   }
 
   // funkcija userPage atgriež HandlerFn tipa vērtību
@@ -182,8 +185,20 @@ public class UserInterface {
         scanner, choices);
 
     switch (choice) {
-      case 1:
-        // TODO:
+      case 1:// TODO: garumzimes
+        clearConsole();
+        Park park = Park.enterNew(scanner, newId);
+        newId++;
+
+        parks.put(park.id(), park);
+
+        try {
+          parkFile.appendOne(park);
+        } catch (Exception e) {
+          System.err.println("Neizdevās pievienot autostavvietu failam: " + e);
+        }
+
+        System.out.println("Jauna autostavvieta ir veiksmigi izveidota!");
         break;
       case 2:
         clearConsole();
@@ -251,6 +266,8 @@ public class UserInterface {
         temp.setName(newName);
         parks.put(temp.id(), temp);
         System.out.println("Nosaukums ir izmainīts");
+
+        saveParks();
         break;
       case 2:
         clearConsole();
@@ -261,6 +278,8 @@ public class UserInterface {
         temp.setAddress(newAddress);
         parks.put(temp.id(), temp);
         System.out.println("Adrese ir izmainīta");
+
+        saveParks();
         break;
       case 3:
         clearConsole();
@@ -271,6 +290,8 @@ public class UserInterface {
         temp.setDistrict(newDistrict);
         parks.put(temp.id(), temp);
         System.out.println("Rajons ir izmainīts");
+
+        saveParks();
         break;
       case 4:
         clearConsole();
@@ -287,6 +308,8 @@ public class UserInterface {
         chosenParkId = -1;
 
         System.out.println("Autostāvvieta dzēsta");
+
+        saveParks();
         return this::parksActionsPage;
       case 6:
         clearConsole();
@@ -445,7 +468,15 @@ public class UserInterface {
     try {
       userFile.writeAll(users.values());
     } catch (Exception e) {
-      System.err.println("Neizdevās lietotāju pievienot failos: " + e);
+      System.err.println("Neizdevās lietotājus pievienot failos: " + e);
+    }
+  }
+
+  private void saveParks() {
+    try {
+      parkFile.writeAll(parks.values());
+    } catch (Exception e) {
+      System.err.println("Neizdevās autostavvietas pievienot failos: " + e); // TODO: garumzimes
     }
   }
 
