@@ -1,41 +1,36 @@
-// import java.util.List;
+import java.util.List;
+import java.util.stream.Collectors;
 
-// TODO: need to implement this for user, park, rate
-// interface TablePrintable {
-// 	String toTableRow(List<Integer> max_widths);
-// }
-
-public class Table {
-	// TODO: add arguments, implement logic
-	// maybe use printf with %-15s format where 15 is maximum width of a column
-	// EXAMPLE ARGUMENTS!!!
-	// public static void printTable(List<String> column_names, List<Integer>
-	// max_column_widths,
-	// List<TablePrintable> elems) {
-	//
-	// }
+interface TablePrintable {
+	String toTableRow(List<Integer> max_widths);
 }
 
-// TODO: EXAMPLE USER IMPLEMENTATION
-// public String toTableRow(List<Integer> widths) {
-// // Создаем строку формата: %-10s %-20s %-10s
-// String formatString = widths.stream()
-// .map(w -> "%-" + w + "s")
-// .collect(Collectors.joining(" | ", "| ", " |%n"));
-//
-// String.format(formatString, email, role);
-// }
+public class Table {
+	public static void printTable(List<String> columnNames, List<Integer> maxColumnWidths,
+			List<TablePrintable> elems) {
+		String separator = separator(maxColumnWidths);
+		String formatString = maxColumnWidths.stream()
+				.map(w -> "%-" + w + "s")
+				.collect(Collectors.joining(" | ", "| ", " |%n"));
 
-// TODO: USAGE EXAMPLE
-// public static void main(String[] args) {
-// RowPrinter printer = new ConsoleRowPrinter();
-//
-// // 1. Конфигурируем ширину колонок
-// List<Integer> columns = List.of(10, 15, 5);
-// HandlerFn rowHandler = printer.invoke(columns);
-//
-// // 2. Печатаем строки, используя полученный хендлер
-// rowHandler.handle("ID", "Name", "Age");
-// rowHandler.handle("1", "John Doe", "30");
-// rowHandler.handle("2", "Jane Smith", "25");
-// }
+		System.out.println(separator);
+		System.out.printf(formatString, columnNames.toArray());
+
+		for (TablePrintable row : elems) {
+			System.out.println(separator);
+			System.out.println(row.toTableRow(maxColumnWidths));
+		}
+		System.out.println(separator);
+	}
+
+	private static String separator(List<Integer> widths) {
+		String result = "+";
+		for (int i = 0; i < widths.size(); i++) {
+			for (int j = 0; j < widths.get(i) + 2; j++) {
+				result += "-";
+			}
+			result += "+";
+		}
+		return result;
+	}
+}

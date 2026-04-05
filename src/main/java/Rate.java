@@ -1,7 +1,9 @@
 import java.time.LocalTime;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 // TODO: add toString methods
 enum RateType {
@@ -102,7 +104,7 @@ public class Rate implements CSVEncodable {
       throw new Exception("Cena nevar but negativa!");
     }
 
-    LocalTime startTime = LocalTime.now();
+    LocalTime startTime = LocalTime.MIDNIGHT;
     LocalTime endTime = startTime;
     if (rateType != RateType.DayWhole) {
       System.out.print("Ievadi laiku, kad tarifs saka darboties (hh:mm): ");
@@ -124,7 +126,7 @@ public class Rate implements CSVEncodable {
       }
     }
 
-    int multipleCount = 0;
+    int multipleCount = 1;
     if (rateType == RateType.DaysMultiple || rateType == RateType.HoursMultiple) {
       System.out.print("Ievadi daudzumu: ");
       try {
@@ -177,21 +179,25 @@ public class Rate implements CSVEncodable {
         + endTime + "," + multipleCount + "," + weekDays + "\n";
   }
 
-  public String toString() {
-    // TODO add complex toString, that check rateType and print accordingly
-    // Include id too
-    return super.toString();
-  }
+  public String toTableRow(List<Integer> widths) {
+    String formatString = widths.stream()
+        .map(w -> "%-" + w + "s")
+        .collect(Collectors.joining(" | ", "| ", " |%n"));
 
-  // funkcija print pieņem int tipa vērtību tabulasPlatums un neatgriež nekādu
-  // vērtību
-  // public void print(int width) {
-  // // Izmanto formatēto izvadi, lai dati konsolē izskatītos sakārtoti
-  // (izlīdzināti pēc platuma)
-  // System.out.printf("Auto tips: %-14s; Cena par stundu: %d; Tarifa tips: %-" +
-  // width + "s; Pilna cena: %d\n",
-  // autoType, hourRate, name, fullPrice);
-  // }
+    String wkd = "";
+    int i = 1;
+    byte temp = weekDays;
+    while (temp > 0) {
+      if ((temp & 1) == 1) {
+        wkd += i + ",";
+      }
+      temp = (byte) (temp >> 1);
+      i++;
+    }
+    wkd = wkd.substring(0, wkd.length() - 1);
+
+    return String.format(formatString, id, autoType, rateType, price, wkd, startTime, endTime, multipleCount);
+  }
 
   // funkcija fromCSV pieņem String tipa vērtību csvDati un atgriež Rate tipa
   // vērtību jaunsTarifs

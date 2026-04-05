@@ -1,5 +1,8 @@
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.regex.Pattern;
 
 enum UserRole {
@@ -15,7 +18,7 @@ enum UserRole {
   };
 }
 
-public class User implements CSVEncodable {
+public class User implements CSVEncodable, TablePrintable {
   private String email;
   private String password;
   private UserRole role;
@@ -153,14 +156,16 @@ public class User implements CSVEncodable {
     return email + "," + password + "," + role.name() + "," + phoneNumber + "," + autoType.name() + "\n";
   }
 
-  // funkcija print neko neatgriež un neko nepienem
-  public void print(int width) {
-    System.out.printf("E-pasts: %-" + width + "s; Loma: %-14s; Tālruņa numurs: %s; Automašīnas tips: %-12s\n", email,
-        role, phoneNumber, autoType);
-  }
-
   public boolean checkPassword(String check) {
     return password.equals(check);
+  }
+
+  public String toTableRow(List<Integer> widths) {
+    String formatString = widths.stream()
+        .map(w -> "%-" + w + "s")
+        .collect(Collectors.joining(" | ", "| ", " |%n"));
+
+    return String.format(formatString, email, role, phoneNumber, autoType);
   }
 
   // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa

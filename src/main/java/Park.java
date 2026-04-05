@@ -1,6 +1,8 @@
 import java.util.Scanner;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class Park implements CSVEncodable {
+public class Park implements CSVEncodable, TablePrintable {
     private int id;
     private String name;
     private String address;
@@ -79,6 +81,14 @@ public class Park implements CSVEncodable {
         System.out.printf("Nosaukums: %-" + name_width + "s; Adrese: %-" +
                 address_width + "s; Rajons: %-14s\n",
                 name, address, district);
+    }
+
+    public String toTableRow(List<Integer> widths) {
+        String formatString = widths.stream()
+                .map(w -> "%-" + w + "s")
+                .collect(Collectors.joining(" | ", "| ", " |%n"));
+
+        return String.format(formatString, id, name, address, district);
     }
 
     // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa

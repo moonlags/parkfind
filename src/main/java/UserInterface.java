@@ -3,6 +3,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 @FunctionalInterface
@@ -142,17 +143,22 @@ public class UserInterface {
         scanner, choices);
 
     switch (choice) {
+      // TODO: garumzimes
       case 1:
         clearConsole();
-        int max_width = 0;
-        for (String email : users.keySet()) {
-          if (email.length() > max_width)
-            max_width = email.length();
-        }
+        // int max_width = 0;
+        // for (String email : users.keySet()) {
+        // if (email.length() > max_width)
+        // max_width = email.length();
+        // }
+        //
+        // for (User user : users.values()) {
+        // user.print(max_width);
+        // }
+        // return String.format(formatString, email, role, phoneNumber, autoType);
+        List<String> columnNames = List.of("E-pasts", "Loma", "Talruna numurs", "Automasinas tips");
 
-        for (User user : users.values()) {
-          user.print(max_width);
-        }
+        // Table.printTable(, max_column_widths, elems);
         break;
       case 2:
         clearConsole();
@@ -185,9 +191,11 @@ public class UserInterface {
   }
 
   // funkcija parksActionsPage atgriež HandlerFn tipa vērtību
+  // TOOD: garumzimes
   private HandlerFn parksActionsPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Pievienot autostāvvietu", "Apskatīt autostāvvietu sarakstu", "Atpakaļ", "Iziet"));
+        Arrays.asList("Pievienot autostāvvietu", "Apskatīt autostāvvietu sarakstu", "Rediget autostavvietu", "Atpakaļ",
+            "Iziet"));
     int choice = Menu.printMenu(
         scanner, choices);
 
@@ -217,48 +225,36 @@ public class UserInterface {
         break;
       case 2:
         clearConsole();
-        return this::parkListActionsPage;
+        for (Park p : parks.values()) {
+          p.print(20, 20);
+        }
+        break;
       case 3:
         clearConsole();
-        return this::adminPage;
+        System.out.print("Ievadiet autostavvietas id: ");
+        try {
+          int id = Integer.valueOf(scanner.nextLine());
+          if (!parks.containsKey(id)) {
+            Color.error("Autostavvieta nav atrasta!");
+            break;
+          }
+
+          chosenParkId = id;
+          return this::singleParkActionsPage;
+        } catch (Exception e) {
+          Color.error("Autostavvietas id nav ievadits pareizi!");
+          break;
+        }
       case 4:
+        clearConsole();
+        return this::adminPage;
+      case 5:
         clearConsole();
         System.out.println("Visu labu");
         System.exit(0);
     }
 
     return this::parksActionsPage;
-  }
-
-  private HandlerFn parkListActionsPage() {
-    ArrayList<String> choices = new ArrayList<>();
-    ArrayList<Integer> parkIds = new ArrayList<>();
-
-    choices.add("Atpakaļ");
-    choices.add("Iziet");
-
-    for (Park park : parks.values()) {
-      choices.add(park.toString());
-      parkIds.add(park.id());
-    }
-
-    int choice = Menu.printMenu(
-        scanner, choices);
-
-    switch (choice) {
-      case 1:
-        clearConsole();
-        return this::parksActionsPage;
-      case 2:
-        clearConsole();
-        System.out.println("Visu labu");
-        System.exit(0);
-      default:
-        clearConsole();
-        System.out.println("Jūs izvēlējaties " + (choice - 2) + ". autostāvvietu!");
-        chosenParkId = parkIds.get(choice - 2);
-        return this::singleParkActionsPage;
-    }
   }
 
   private HandlerFn singleParkActionsPage() {
@@ -329,7 +325,7 @@ public class UserInterface {
       case 6:
         clearConsole();
         chosenParkId = -1;
-        return this::parkListActionsPage;
+        return this::parksActionsPage;
       case 7:
         clearConsole();
         System.out.println("Visu labu");
@@ -498,7 +494,6 @@ public class UserInterface {
   }
 
   // funkcija loadRates neko nepieņem un neko neatgriež
-  // TODO
   private void loadRates() {
     try {
       ArrayList<Rate> rateArray = rateFile.loadAll();
@@ -506,7 +501,9 @@ public class UserInterface {
         if (!rates.containsKey(rate.parkId())) {
           rates.put(rate.parkId(), new ArrayList<>());
         }
-        rates.get(rate.parkId()).add(rate);
+        ArrayList<Rate> temp = rates.get(rate.parkId());
+        temp.add(rate);
+        rates.put(rate.parkId(), temp);
       }
     } catch (Exception e) {
       Color.warn("Neizdevās ielādēt tarifu: " + e);
