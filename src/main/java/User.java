@@ -40,6 +40,10 @@ public class User implements CSVEncodable {
     return email;
   }
 
+  public String phoneNumber() {
+    return phoneNumber;
+  }
+
   // funkcija login pieņem Scanner tipa vērtību scanner, HashMap<String, User>
   // tipa vērtību users un
   // atgriež User tipa vērtību user
@@ -59,8 +63,7 @@ public class User implements CSVEncodable {
   }
 
   // funkcija register pieņem Scanner tipa vērtību scanner, HashMap<String, User>
-  // tipa vērtību users
-  // un atgriež User tipa vērtību user
+  // tipa vērtību users un atgriež User tipa vērtību user
   public static User register(Scanner scanner, HashMap<String, User> users) throws Exception {
     System.out.print("Ievadi e-pastu: ");
     String email = scanner.nextLine();
@@ -70,6 +73,18 @@ public class User implements CSVEncodable {
 
     if (users.containsKey(email)) {
       throw new Exception("E-pasts ir jau izmantots!");
+    }
+
+    System.out.print("Ievadi tālruņa numuru (piem. +37121234567): ");
+    String phoneNumber = scanner.nextLine();
+    if (phoneNumber.charAt(0) != '+' || phoneNumber.length() != 12) {
+      throw new Exception("Nepareizs tālruņa numura formāts!");
+    }
+
+    for (User elem : users.values()) {
+      if (elem.phoneNumber.equals(phoneNumber)) {
+        throw new Exception("Talruna numurs ir jau izmantots!");
+      }
     }
 
     System.out.print("Izdomā paroli: ");
@@ -84,13 +99,6 @@ public class User implements CSVEncodable {
     if (!pwd.equals(pwd2)) {
       throw new Exception("Paroles nesakrīt!");
     }
-
-    System.out.print("Ievadi tālruņa numuru (piem. +37121234567): ");
-    String phoneNumber = scanner.nextLine();
-    if (phoneNumber.charAt(0) != '+' || phoneNumber.length() != 12) {
-      throw new Exception("Nepareizs tālruņa numura formāts!");
-    }
-    // TODO: add verification that phone number doesnt already exist
 
     User user = new User(email, pwd, UserRole.User, phoneNumber, AutoType.Any);
 
