@@ -17,19 +17,19 @@ public class Color {
 
     // funkcija printRed pieņem String tipa vērtību sarkanāTekstaRinda un neatgriež
     // nekādu vērtību
-    public static void printRed(String text) {
+    public static void error(String text) {
         System.out.println(RED + text + RESET);
     }
 
     // funkcija printGreen pieņem String tipa vērtību zaļāTekstaRinda un neatgriež
     // nekādu vērtību
-    public static void printGreen(String text) {
+    public static void success(String text) {
         System.out.println(GREEN + text + RESET);
     }
 
     // funkcija printYellow pieņem String tipa vērtību dzeltenāTekstaRinda un
     // neatgriež nekādu vērtību
-    public static void printYellow(String text) {
+    public static void warn(String text) {
         System.out.println(YELLOW + text + RESET);
     }
 }

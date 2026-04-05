@@ -25,9 +25,9 @@ public class Menu {
           UserInterface.clearConsole();
           return choice;
         }
-        System.out.println("Nav tādas darbības!");
+        Color.error("Nav tādas darbības!");
       } catch (NumberFormatException e) {
-        System.out.println("Ievadi skaitli!");
+        Color.error("Ievadi skaitli!");
       }
     }
   }

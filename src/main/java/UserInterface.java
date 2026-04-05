@@ -61,9 +61,9 @@ public class UserInterface {
         try {
           curr.changePassword(scanner, users);
           clearConsole();
-          System.out.println("Paroles maiņa ir veiksmiga!");
+          Color.success("Paroles maiņa ir veiksmiga!");
         } catch (Exception e) {
-          System.out.println(e.getMessage());
+          Color.error(e.getMessage());
           break;
         }
 
@@ -75,12 +75,12 @@ public class UserInterface {
         System.out.print("Ievadiet paroli: ");
         String pwd = scanner.nextLine();
         if (!curr.checkPassword(pwd)) {
-          System.out.println("Parole nav pareiza!");
+          Color.error("Parole nav pareiza!");
           break;
         }
 
         users.remove(curr.email());
-        System.out.println("Jūsu konts ir dzēsts!");
+        Color.success("Jūsu konts ir dzēsts!");
 
         saveUsers();
         return this::loginPage;
@@ -114,9 +114,9 @@ public class UserInterface {
         try {
           curr.changePassword(scanner, users);
           clearConsole();
-          System.out.println("Paroles maiņa ir veiksmiga!");
+          Color.success("Paroles maiņa ir veiksmiga!");
         } catch (Exception e) {
-          System.out.println(e.getMessage());
+          Color.error(e.getMessage());
           break;
         }
 
@@ -160,15 +160,15 @@ public class UserInterface {
 
         String email = scanner.nextLine();
         if (!users.containsKey(email)) {
-          System.out.println("E-pasts nav atrasts!");
+          Color.error("E-pasts nav atrasts!");
           break;
         } else if (curr.email().equals(email)) {
-          System.out.println("Jus nevarat izdzēst sevi!");
+          Color.error("Jus nevarat izdzēst sevi!");
           break;
         }
 
         users.remove(email);
-        System.out.println("Lietotājs ir izdzēsts!");
+        Color.success("Lietotājs ir izdzēsts!");
 
         saveUsers();
         break;
@@ -199,9 +199,9 @@ public class UserInterface {
         try {
           park = Park.enterNew(scanner, newId);
           clearConsole();
-          System.out.println("Jauna autostavvieta ir veiksmigi izveidota!");
+          Color.success("Jauna autostavvieta ir veiksmigi izveidota!");
         } catch (Exception e) {
-          System.out.println(e.getMessage());
+          Color.error(e.getMessage());
           break;
         }
 
@@ -211,7 +211,7 @@ public class UserInterface {
         try {
           parkFile.appendOne(park);
         } catch (Exception e) {
-          System.err.println("Neizdevās pievienot autostavvietu failam: " + e);
+          Color.warn("Neizdevās pievienot autostavvietu failam: " + e);
         }
 
         break;
@@ -280,7 +280,7 @@ public class UserInterface {
 
         temp.setName(newName);
         parks.put(temp.id(), temp);
-        System.out.println("Nosaukums ir izmainīts");
+        Color.success("Nosaukums ir izmainīts");
 
         saveParks();
         break;
@@ -292,7 +292,7 @@ public class UserInterface {
 
         temp.setAddress(newAddress);
         parks.put(temp.id(), temp);
-        System.out.println("Adrese ir izmainīta");
+        Color.success("Adrese ir izmainīta");
 
         saveParks();
         break;
@@ -304,7 +304,7 @@ public class UserInterface {
 
         temp.setDistrict(newDistrict);
         parks.put(temp.id(), temp);
-        System.out.println("Rajons ir izmainīts");
+        Color.success("Rajons ir izmainīts");
 
         saveParks();
         break;
@@ -322,7 +322,7 @@ public class UserInterface {
         parks.remove(chosenParkId);
         chosenParkId = -1;
 
-        System.out.println("Autostāvvieta dzēsta");
+        Color.success("Autostāvvieta dzēsta");
 
         saveParks();
         return this::parksActionsPage;
@@ -355,9 +355,9 @@ public class UserInterface {
         try {
           rate = Rate.enterNew(scanner, newId, chosenParkId);
           clearConsole();
-          System.out.println("Jauns tarifs ir veiksmigi izveidots!");
+          Color.success("Jauns tarifs ir veiksmigi izveidots!");
         } catch (Exception e) {
-          System.out.println(e.getMessage());
+          Color.error(e.getMessage());
           break;
         }
 
@@ -369,7 +369,7 @@ public class UserInterface {
         try {
           rateFile.appendOne(rate);
         } catch (Exception e) {
-          System.err.println("Neizdevās pievienot tarifu failam: " + e);
+          Color.warn("Neizdevās pievienot tarifu failam: " + e);
         }
 
         break;
@@ -380,16 +380,27 @@ public class UserInterface {
 
           temp = rates.get(chosenParkId);
           int i = 0;
+          boolean found = false;
           for (Rate el : temp) {
-            if (el.id() == id)
+            if (el.id() == id) {
+              found = true;
               temp.remove(i);
+              break;
+            }
             i++;
           }
 
+          if (!found) {
+            Color.error("Tarifs nav atrasts!");
+            break;
+          }
+
           rates.put(chosenParkId, temp);
-          System.out.println("Tarifs ir dzēsts");
+          saveRates();
+
+          Color.success("Tarifs ir dzēsts");
         } catch (Exception e) {
-          System.out.println("Ievadi pareizo tarifa ID!");
+          Color.error("Ievadi pareizo tarifa ID!");
         }
       case 3:
         clearConsole();
@@ -422,16 +433,16 @@ public class UserInterface {
         try {
           curr = User.register(scanner, users);
           clearConsole();
-          System.out.println("Reģistrācija ir veiksmīga!");
+          Color.success("Reģistrācija ir veiksmīga!");
         } catch (Exception e) {
-          System.out.println(e.getMessage());
+          Color.error(e.getMessage());
           break;
         }
 
         try {
           userFile.appendOne(curr);
         } catch (Exception e) {
-          System.err.println("Neizdevās pievienot lietotāju failam: " + e);
+          Color.warn("Neizdevās pievienot lietotāju failam: " + e);
         }
 
         return this::userPage;
@@ -470,7 +481,7 @@ public class UserInterface {
         users.put(user.email(), user);
       }
     } catch (Exception e) {
-      System.err.println("Neizdevās ielādēt lietotājus: " + e);
+      Color.warn("Neizdevās ielādēt lietotājus: " + e);
     }
   }
 
@@ -482,7 +493,7 @@ public class UserInterface {
         parks.put(park.id(), park);
       }
     } catch (Exception e) {
-      System.err.println("Neizdevās ielādēt autostāvvietu: " + e);
+      Color.warn("Neizdevās ielādēt autostāvvietu: " + e);
     }
   }
 
@@ -498,7 +509,7 @@ public class UserInterface {
         rates.get(rate.parkId()).add(rate);
       }
     } catch (Exception e) {
-      System.err.println("Neizdevās ielādēt tarifu: " + e);
+      Color.warn("Neizdevās ielādēt tarifu: " + e);
     }
   }
 
@@ -507,7 +518,7 @@ public class UserInterface {
     try {
       userFile.writeAll(users.values());
     } catch (Exception e) {
-      System.err.println("Neizdevās lietotājus pievienot failos: " + e);
+      Color.warn("Neizdevās lietotājus pievienot failos: " + e);
     }
   }
 
@@ -515,7 +526,17 @@ public class UserInterface {
     try {
       parkFile.writeAll(parks.values());
     } catch (Exception e) {
-      System.err.println("Neizdevās autostavvietas pievienot failos: " + e); // TODO: garumzimes
+      Color.warn("Neizdevās autostavvietas pievienot failos: " + e); // TODO: garumzimes
+    }
+  }
+
+  private void saveRates() {
+    try {
+      for (ArrayList<Rate> ratesForParks : rates.values()) {
+        rateFile.writeAll(ratesForParks);
+      }
+    } catch (Exception e) {
+      Color.warn("Neizdevās tarifus pievienot failos: " + e);
     }
   }
 
