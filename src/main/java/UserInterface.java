@@ -70,9 +70,16 @@ public class UserInterface {
         saveUsers();
         break;
       case 3:
-        // TODO: check password
-        users.remove(curr.email());
         clearConsole();
+
+        System.out.print("Ievadiet paroli: ");
+        String pwd = scanner.nextLine();
+        if (!curr.checkPassword(pwd)) {
+          System.out.println("Parole nav pareiza!");
+          break;
+        }
+
+        users.remove(curr.email());
         System.out.println("Jūsu konts ir dzēsts!");
 
         saveUsers();

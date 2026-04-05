@@ -151,6 +151,10 @@ public class User implements CSVEncodable {
         role, phoneNumber, autoType);
   }
 
+  public boolean checkPassword(String check) {
+    return password.equals(check);
+  }
+
   // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa
   // vērtību
   public static User fromCSV(String csvdata) throws Exception {
