@@ -1,6 +1,6 @@
 public class Color {
 
-    // ANSI bēgšanas kodi (escape codes), kas liek terminālim mainīt teksta krāsu
+    // ANSI bēgšanas kodi, kas liek terminālim mainīt teksta krāsu
     public static final String RESET = "\u001B[0m";
     public static final String RED = "\u001B[31m";
     public static final String GREEN = "\u001B[32m";
