@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -250,9 +251,12 @@ public class UserInterface {
             district_width = p.district().length();
         }
 
+        ArrayList<Park> temp = new ArrayList<>(parks.values());
+        temp.sort(Comparator.comparing(Park::id));
+
         List<Integer> max_column_widths = List.of(id_width, name_width, address_width, district_width);
 
-        Table.printTable(columnNames, max_column_widths, List.copyOf(parks.values()));
+        Table.printTable(columnNames, max_column_widths, temp);
         break;
       case 3:
         clearConsole();
@@ -435,7 +439,7 @@ public class UserInterface {
         }
 
         List<String> columnNames = List.of("ID", "Auto tips", "Tarifa tips", "Pilna cena", "Nedeļas dienas",
-            "Sākuma laiks", "Beigu laiks", "Daudzums");
+            "Sākuma laiks", "Beigu laiks", "Daudzums", "Bezmaksas stundas");
 
         int id_width = 2;
         int price_width = 10;
@@ -446,7 +450,7 @@ public class UserInterface {
             price_width = String.valueOf(p.price()).length();
         }
 
-        List<Integer> max_column_widths = List.of(id_width, 9, 14, price_width, 14, 12, 11, 8);
+        List<Integer> max_column_widths = List.of(id_width, 9, 14, price_width, 14, 12, 11, 8, 17);
 
         Table.printTable(columnNames, max_column_widths, List.copyOf(rates.get(chosenParkId)));
         break;

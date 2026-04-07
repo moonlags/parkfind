@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 enum RateType {
   PerHour,
   DayPart,
-  Night,
   MonthWhole,
   DaysMultiple,
   HoursMultiple,
@@ -26,11 +25,15 @@ public class Rate implements CSVEncodable, TablePrintable {
   private LocalTime endTime;
   private int multipleCount;
   private byte weekDays;
+  private float freeHours;
 
-  // funkcija Rate pieņem int tipa vērtību id, AutoType tipa vērtību autoType, RateType tipa vērtību rateType, float tipa vērtību price, LocalTime tipa vērtību startTime, 
-  // LocalTime tipa vērtību endTime, int tipa vērtību mutipleCount, byte tipa vērtību weekDays un neatgriež nekādu vērtību
+  // funkcija Rate pieņem int tipa vērtību id, AutoType tipa vērtību autoType,
+  // RateType tipa vērtību rateType, float tipa vērtību price, LocalTime tipa
+  // vērtību startTime,
+  // LocalTime tipa vērtību endTime, int tipa vērtību mutipleCount, byte tipa
+  // vērtību weekDays un neatgriež nekādu vērtību
   public Rate(int id, int parkId, AutoType autoType, RateType rateType, float price, LocalTime startTime,
-      LocalTime endTime, int multipleCount, byte weekDays) {
+      LocalTime endTime, int multipleCount, byte weekDays, float freeHours) {
     this.id = id;
     this.parkId = parkId;
     this.autoType = autoType;
@@ -40,14 +43,16 @@ public class Rate implements CSVEncodable, TablePrintable {
     this.endTime = endTime;
     this.multipleCount = multipleCount;
     this.weekDays = weekDays;
+    this.freeHours = freeHours;
   }
 
-  // funkcija price atgriež float tipa vērtību price 
+  // funkcija price atgriež float tipa vērtību price
   public float price() {
     return price;
   }
 
-  // funkcija enterNew pieņem Scanner tipa vērtību scanner, int tipa vērtību id, int tipa vērtību parkId un atgriež Rate tipa vērtību rate
+  // funkcija enterNew pieņem Scanner tipa vērtību scanner, int tipa vērtību id,
+  // int tipa vērtību parkId un atgriež Rate tipa vērtību rate
   public static Rate enterNew(Scanner scanner, int id, int parkId) throws Exception {
     ArrayList<String> choices = new ArrayList<>(
         Arrays.asList("Izveleties jebkuru auto tipu",
@@ -71,7 +76,7 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     choices = new ArrayList<>(
         Arrays.asList("Izveidot stundas tipa tarifu", "Izveidot dienas posma tipa tarifu",
-            "Izveidot nakts tipa tarifu", "Izveidot mēneša tipa tarifu",
+            "Izveidot mēneša tipa tarifu",
             "Izveidot vairāku dienu tipa tarifu",
             "Izveidot vairāku stundu tipa tarifu", "Izveidot vairāku menešu tipa tarifu", "Atpakal"));
     choice = Menu.printMenu(
@@ -86,21 +91,18 @@ public class Rate implements CSVEncodable, TablePrintable {
         rateType = RateType.DayPart;
         break;
       case 3:
-        rateType = RateType.Night;
-        break;
-      case 4:
         rateType = RateType.MonthWhole;
         break;
-      case 5:
+      case 4:
         rateType = RateType.DaysMultiple;
+        break;
+      case 5:
+        rateType = RateType.HoursMultiple;
         break;
       case 6:
         rateType = RateType.HoursMultiple;
         break;
       case 7:
-        rateType = RateType.HoursMultiple;
-        break;
-      case 8:
         throw new Exception("Tarifa izveide ir aptureta!");
       default:
         rateType = RateType.PerHour;
@@ -116,6 +118,16 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     if (price < 0) {
       throw new Exception("Cena nevar but negativa!");
+    }
+
+    float freeHours = 0;
+    if (rateType == RateType.PerHour) {
+      System.out.print("Ievadi bezmaksas stundu daudzumu: ");
+      try {
+        freeHours = Float.valueOf(scanner.nextLine());
+      } catch (Exception e) {
+        throw new Exception("Bezmaksas stundas daudzums nav pareizi uzrakstīts!");
+      }
     }
 
     LocalTime startTime = LocalTime.MIDNIGHT;
@@ -174,7 +186,7 @@ public class Rate implements CSVEncodable, TablePrintable {
       weekdays = (byte) (weekdays | 1 << (day - 1));
     }
 
-    return new Rate(id, parkId, autoType, rateType, price, startTime, endTime, multipleCount, weekdays);
+    return new Rate(id, parkId, autoType, rateType, price, startTime, endTime, multipleCount, weekdays, freeHours);
   }
 
   // funkcija parkId nepieņem nevienu vērtību un atgriež int tipa vērtību parkId
@@ -190,10 +202,11 @@ public class Rate implements CSVEncodable, TablePrintable {
   // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību toCSV
   public String toCSV() {
     return id + "," + parkId + "," + autoType.name() + "," + rateType.name() + "," + price + "," + startTime + ","
-        + endTime + "," + multipleCount + "," + weekDays + "\n";
+        + endTime + "," + multipleCount + "," + weekDays + "," + freeHours + "\n";
   }
 
-  // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež String tipa vērtību tableRow
+  // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež
+  // String tipa vērtību tableRow
   public String toTableRow(List<Integer> widths) {
     String formatString = widths.stream()
         .map(w -> "%-" + w + "s")
@@ -211,17 +224,19 @@ public class Rate implements CSVEncodable, TablePrintable {
     }
     wkd = wkd.substring(0, wkd.length() - 1);
 
-    return String.format(formatString, id, autoType, rateType, price, wkd, startTime, endTime, multipleCount);
+    return String.format(formatString, id, autoType, rateType, price, wkd, startTime, endTime, multipleCount,
+        freeHours);
   }
 
-  // funkcija fromCSV pieņem String tipa vērtību csvData un atgriež Rate tipa vērtību noCSV
+  // funkcija fromCSV pieņem String tipa vērtību csvData un atgriež Rate tipa
+  // vērtību noCSV
   public static Rate fromCSV(String csvdata) throws Exception {
     // Sadala saņemto teksta rindu masīvā, izmantojot komatu kā atdalītāju
     String[] fields = csvdata.split(",");
 
     // Pārbauda, vai rindā ir pietiekami daudz datu lauku, lai izveidotu objektu
-    if (fields.length < 9) {
-      throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 9");
+    if (fields.length < 10) {
+      throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 10");
     }
 
     // Konvertē teksta vērtības uz atbilstošajiem datu tipiem
@@ -234,7 +249,8 @@ public class Rate implements CSVEncodable, TablePrintable {
     LocalTime endTime = LocalTime.parse(fields[6]);
     int multipleCount = Integer.valueOf(fields[7]);
     byte weekDays = Byte.valueOf(fields[8]);
+    float freeHours = Float.valueOf(fields[9]);
 
-    return new Rate(id, parkId, autoType, rateType, price, startTime, endTime, multipleCount, weekDays);
+    return new Rate(id, parkId, autoType, rateType, price, startTime, endTime, multipleCount, weekDays, freeHours);
   }
 }
