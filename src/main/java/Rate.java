@@ -27,8 +27,8 @@ public class Rate implements CSVEncodable, TablePrintable {
   private int multipleCount;
   private byte weekDays;
 
-  // funkcija Rate pieņem int, int, AutoType, float, String, float tipa vērtības
-  // id, parkId, autoType, hourRate, name, fullPrice un neatgriež nekādu vērtību
+  // funkcija Rate pieņem int tipa vērtību id, AutoType tipa vērtību autoType, RateType tipa vērtību rateType, float tipa vērtību price, LocalTime tipa vērtību startTime, 
+  // LocalTime tipa vērtību endTime, int tipa vērtību mutipleCount, byte tipa vērtību weekDays un neatgriež nekādu vērtību
   public Rate(int id, int parkId, AutoType autoType, RateType rateType, float price, LocalTime startTime,
       LocalTime endTime, int multipleCount, byte weekDays) {
     this.id = id;
@@ -42,11 +42,12 @@ public class Rate implements CSVEncodable, TablePrintable {
     this.weekDays = weekDays;
   }
 
+  // funkcija price atgriež float tipa vērtību price 
   public float price() {
     return price;
   }
 
-  // TODO: garumzimes
+  // funkcija enterNew pieņem Scanner tipa vērtību scanner, int tipa vērtību id, int tipa vērtību parkId un atgriež Rate tipa vērtību rate
   public static Rate enterNew(Scanner scanner, int id, int parkId) throws Exception {
     ArrayList<String> choices = new ArrayList<>(
         Arrays.asList("Izveleties jebkuru auto tipu",
@@ -181,17 +182,18 @@ public class Rate implements CSVEncodable, TablePrintable {
     return parkId;
   }
 
+  // funkcija id atgriež int tipa vērtību id
   public int id() {
     return id;
   }
 
-  // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību
-  // csvRinda
+  // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību toCSV
   public String toCSV() {
     return id + "," + parkId + "," + autoType.name() + "," + rateType.name() + "," + price + "," + startTime + ","
         + endTime + "," + multipleCount + "," + weekDays + "\n";
   }
 
+  // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež String tipa vērtību tableRow
   public String toTableRow(List<Integer> widths) {
     String formatString = widths.stream()
         .map(w -> "%-" + w + "s")
@@ -212,8 +214,7 @@ public class Rate implements CSVEncodable, TablePrintable {
     return String.format(formatString, id, autoType, rateType, price, wkd, startTime, endTime, multipleCount);
   }
 
-  // funkcija fromCSV pieņem String tipa vērtību csvDati un atgriež Rate tipa
-  // vērtību jaunsTarifs
+  // funkcija fromCSV pieņem String tipa vērtību csvData un atgriež Rate tipa vērtību noCSV
   public static Rate fromCSV(String csvdata) throws Exception {
     // Sadala saņemto teksta rindu masīvā, izmantojot komatu kā atdalītāju
     String[] fields = csvdata.split(",");
