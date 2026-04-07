@@ -1,6 +1,5 @@
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.regex.Pattern;
@@ -163,7 +162,7 @@ public class User implements CSVEncodable, TablePrintable {
   public String toTableRow(List<Integer> widths) {
     String formatString = widths.stream()
         .map(w -> "%-" + w + "s")
-        .collect(Collectors.joining(" | ", "| ", " |%n"));
+        .collect(Collectors.joining(" | ", "| ", " |"));
 
     return String.format(formatString, email, role, phoneNumber, autoType);
   }

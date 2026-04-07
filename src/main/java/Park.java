@@ -51,6 +51,14 @@ public class Park implements CSVEncodable, TablePrintable {
         return name;
     }
 
+    public String address() {
+        return address;
+    }
+
+    public String district() {
+        return district;
+    }
+
     // funkcija setName pieņem String tipa vērtību name
     public void setName(String name) {
         this.name = name;
@@ -86,7 +94,7 @@ public class Park implements CSVEncodable, TablePrintable {
     public String toTableRow(List<Integer> widths) {
         String formatString = widths.stream()
                 .map(w -> "%-" + w + "s")
-                .collect(Collectors.joining(" | ", "| ", " |%n"));
+                .collect(Collectors.joining(" | ", "| ", " |"));
 
         return String.format(formatString, id, name, address, district);
     }

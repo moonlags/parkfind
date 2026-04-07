@@ -16,7 +16,7 @@ enum RateType {
   HoursMultiple
 }
 
-public class Rate implements CSVEncodable {
+public class Rate implements CSVEncodable, TablePrintable {
   private int id;
   private int parkId;
   private AutoType autoType;
@@ -40,6 +40,10 @@ public class Rate implements CSVEncodable {
     this.endTime = endTime;
     this.multipleCount = multipleCount;
     this.weekDays = weekDays;
+  }
+
+  public float price() {
+    return price;
   }
 
   // TODO: garumzimes
@@ -182,7 +186,7 @@ public class Rate implements CSVEncodable {
   public String toTableRow(List<Integer> widths) {
     String formatString = widths.stream()
         .map(w -> "%-" + w + "s")
-        .collect(Collectors.joining(" | ", "| ", " |%n"));
+        .collect(Collectors.joining(" | ", "| ", " |"));
 
     String wkd = "";
     int i = 1;
