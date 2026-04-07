@@ -67,50 +67,65 @@ public class User implements CSVEncodable, TablePrintable {
   // funkcija register pieņem Scanner tipa vērtību scanner, HashMap<String, User>
   // tipa vērtību users un atgriež User tipa vērtību user
   public static User register(Scanner scanner, HashMap<String, User> users) throws Exception {
-    System.out.print("Ievadi e-pastu: ");
-    String email = scanner.nextLine();
-    if (!validateEmail(email)) {
-      throw new Exception("Nepareizs e-pasta formāts!");
-    }
+    System.out.println("Reģistrācija (ieraksti \"iziet\" jebkurā brīdī, lai atceltu)");
 
-    if (users.containsKey(email)) {
-      throw new Exception("E-pasts ir jau izmantots!");
-    }
-
-    System.out.print("Ievadi tālruņa numuru (piem. +37121234567): ");
-    String phoneNumber = scanner.nextLine();
-    if (phoneNumber.charAt(0) != '+' || phoneNumber.length() != 12) {
-      throw new Exception("Nepareizs tālruņa numura formāts!");
-    }
-
-    for (User elem : users.values()) {
-      if (elem.phoneNumber.equals(phoneNumber)) {
-        throw new Exception("Talruna numurs ir jau izmantots!");
+    String email = readLineOrExit(scanner, "Ievadi e-pastu: ");
+    while (!validateEmail(email) || users.containsKey(email)) {
+      if (!validateEmail(email)) {
+        Color.error("Nepareizs e-pasta formāts!");
+      } else {
+        Color.error("E-pasts ir jau izmantots!");
       }
+      email = readLineOrExit(scanner, "Ievadi e-pastu: ");
     }
 
-    System.out.print("Izdomā paroli: ");
-    String pwd = scanner.nextLine();
-    if (!validatePassword(pwd)) {
-      throw new Exception(
-          "Parolei jābūt vismaz 8 simbolu garai, saturēt mazos burtus, lielos burtus un ciparus!");
+    String phoneNumber = readLineOrExit(scanner, "Ievadi tālruņa numuru (piem. +37121234567): ");
+    while (phoneNumber.length() != 12 || phoneNumber.charAt(0) != '+' || phoneNumberExists(users, phoneNumber)) {
+      if (phoneNumber.length() != 12 || phoneNumber.charAt(0) != '+') {
+        Color.error("Nepareizs tālruņa numura formāts!");
+      } else {
+        Color.error("Tālruņa numurs ir jau izmantots!");
+      }
+      phoneNumber = readLineOrExit(scanner, "Ievadi tālruņa numuru (piem. +37121234567): ");
     }
 
-    System.out.print("Ievadi paroli vēlreiz: ");
-    String pwd2 = scanner.nextLine();
-    if (!pwd.equals(pwd2)) {
-      throw new Exception("Paroles nesakrīt!");
+    String pwd = readLineOrExit(scanner, "Izdomā paroli: ");
+    while (!validatePassword(pwd)) {
+      Color.error("Parolei jābūt vismaz 8 simbolu garai, saturēt mazos burtus, lielos burtus un ciparus!");
+      pwd = readLineOrExit(scanner, "Izdomā paroli: ");
+    }
+
+    String pwd2 = readLineOrExit(scanner, "Ievadi paroli vēlreiz: ");
+    while (!pwd.equals(pwd2)) {
+      Color.error("Paroles nesakrīt!");
+      pwd2 = readLineOrExit(scanner, "Ievadi paroli vēlreiz: ");
     }
 
     User user = new User(email, pwd, UserRole.User, phoneNumber, AutoType.Any);
-
     users.put(email, user);
+    Color.success("Reģistrācija veiksmīga.");
     return user;
   }
 
-  // funkcija changePassword pieņem Scanner tipa vērtību scanner, HashMap<String,
-  // User> tipa vērtību
-  // users
+  private static String readLineOrExit(Scanner scanner, String prompt) throws Exception {
+    System.out.print(prompt);
+    String line = scanner.nextLine();
+    if (line != null && line.trim().equalsIgnoreCase("iziet")) {
+      throw new Exception("Reģistrācija atcelta lietotāja pieprasījumā.");
+    }
+    return line;
+  }
+
+  private static boolean phoneNumberExists(HashMap<String, User> users, String phoneNumber) {
+    for (User elem : users.values()) {
+      if (elem.phoneNumber != null && elem.phoneNumber.equals(phoneNumber))
+        return true;
+    }
+    return false;
+  }
+
+  // funkcija changePassword pieņem Scanner tipa vērtību scanner,
+  // HashMap<String, User> tipa vērtību users
   public void changePassword(Scanner scanner, HashMap<String, User> users) throws Exception {
     System.out.print("Ievadi pašreizējo paroli: ");
     String curr_pwd = scanner.nextLine();

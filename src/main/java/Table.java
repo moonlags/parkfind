@@ -8,6 +8,11 @@ interface TablePrintable {
 public class Table {
 	public static void printTable(List<String> columnNames, List<Integer> maxColumnWidths,
 			List<TablePrintable> elems) {
+
+		for (int i = 0; i < columnNames.size(); i++) {
+			columnNames.set(i, Color.CYAN + columnNames.get(i) + Color.RESET);
+		}
+
 		String separator = separator(maxColumnWidths);
 		String formatString = maxColumnWidths.stream()
 				.map(w -> "%-" + w + "s")

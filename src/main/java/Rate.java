@@ -58,8 +58,10 @@ public class Rate implements CSVEncodable, TablePrintable {
     switch (choice) {
       case 1:
         autoType = AutoType.Any;
+        break;
       case 2:
         autoType = AutoType.Electro;
+        break;
       case 3:
         throw new Exception("Tarifa izveide ir aptureta!");
       default:
@@ -78,18 +80,25 @@ public class Rate implements CSVEncodable, TablePrintable {
     switch (choice) {
       case 1:
         rateType = RateType.PerHour;
+        break;
       case 2:
         rateType = RateType.DayPart;
+        break;
       case 3:
         rateType = RateType.DayWhole;
+        break;
       case 4:
         rateType = RateType.MonthWhole;
+        break;
       case 5:
         rateType = RateType.MonthPart;
+        break;
       case 6:
         rateType = RateType.DaysMultiple;
+        break;
       case 7:
         rateType = RateType.HoursMultiple;
+        break;
       case 8:
         throw new Exception("Tarifa izveide ir aptureta!");
       default:
