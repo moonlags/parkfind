@@ -15,19 +15,19 @@ public class Color {
     public static final String REVERSED = "\u001B[7m";
     public static final String BG_RED = "\u001B[41m";
 
-    // funkcija printRed pieņem String tipa vērtību sarkanāTekstaRinda un neatgriež
+    // funkcija error pieņem String tipa vērtību text un neatgriež
     // nekādu vērtību
     public static void error(String text) {
         System.out.println(RED + text + RESET);
     }
 
-    // funkcija printGreen pieņem String tipa vērtību zaļāTekstaRinda un neatgriež
+    // funkcija success pieņem String tipa vērtību text un neatgriež
     // nekādu vērtību
     public static void success(String text) {
         System.out.println(GREEN + text + RESET);
     }
 
-    // funkcija printYellow pieņem String tipa vērtību dzeltenāTekstaRinda un
+    // funkcija warn pieņem String tipa vērtību text un
     // neatgriež nekādu vērtību
     public static void warn(String text) {
         System.out.println(YELLOW + text + RESET);
