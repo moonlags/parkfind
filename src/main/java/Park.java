@@ -18,7 +18,7 @@ public class Park implements CSVEncodable, TablePrintable {
         this.district = district;
     }
 
-    // TODO: garumzimes
+     // funkcija enterNew pieņem Scanner tipa vērtību scanner un int tipa vērtību id un atgriež Park tipa vērtību park
     public static Park enterNew(Scanner scanner, int id) throws Exception {
         System.out.println("Ievadiet autostavvietas datus vai \'iziet\'!");
         System.out.print("Ievadi nosaukumu: ");
@@ -51,10 +51,12 @@ public class Park implements CSVEncodable, TablePrintable {
         return name;
     }
 
+    // funkcija atgriež String tipa vērtību address
     public String address() {
         return address;
     }
 
+    // funkcija atgriež String tipa vērtību district
     public String district() {
         return district;
     }
@@ -84,7 +86,7 @@ public class Park implements CSVEncodable, TablePrintable {
         return id + "," + name + "," + address + "," + district + "\n";
     }
 
-    // funkcija print neko neatgriež un neko nepienem
+    // funkcija print neko nepieņem un neko neatgriež
     public void print(int name_width, int address_width) {
         System.out.printf("Nosaukums: %-" + name_width + "s; Adrese: %-" +
                 address_width + "s; Rajons: %-14s\n",
@@ -99,8 +101,7 @@ public class Park implements CSVEncodable, TablePrintable {
         return String.format(formatString, id, name, address, district);
     }
 
-    // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa
-    // vērtību
+    // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež Park tipa vērtību park
     public static Park fromCSV(String csvdata) throws Exception {
         String[] fields = csvdata.split(",");
         if (fields.length < 4) {

@@ -6,6 +6,8 @@ interface TablePrintable {
 }
 
 public class Table {
+	// funkcija printTable pieņem List<String> tipa vērtību columnNames, List<Integer> tipa vērtību maxColumnWidths, 
+	// List<TablePrintable> tipa vērtību elems un atgriež nevienu vērtību 
 	public static void printTable(List<String> columnNames, List<Integer> maxColumnWidths,
 			List<TablePrintable> elems) {
 		String separator = separator(maxColumnWidths);
@@ -23,6 +25,7 @@ public class Table {
 		System.out.println(separator);
 	}
 
+	// funkcija separator pieņem List<Integer> tipa vērtību widths un atgriež String tipa vērtību result
 	private static String separator(List<Integer> widths) {
 		String result = "+";
 		for (int i = 0; i < widths.size(); i++) {
