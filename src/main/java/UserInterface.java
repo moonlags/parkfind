@@ -43,7 +43,7 @@ public class UserInterface {
     rateFile = new FileHandler<>("data/rates.csv", Rate::fromCSV);
 
     page = this::loginPage;
-    newId = 1;
+    newId = 1; // TODO: load from file
   }
 
   // funkcija userPage atgriež HandlerFn tipa vērtību
@@ -383,6 +383,9 @@ public class UserInterface {
         }
 
         newId++;
+        if (!rates.containsKey(chosenParkId)) {
+          rates.put(chosenParkId, new ArrayList<>());
+        }
         temp = rates.get(chosenParkId);
         temp.add(rate);
         rates.put(chosenParkId, temp);
@@ -426,7 +429,7 @@ public class UserInterface {
         break;
       case 3:
         clearConsole();
-        if (rates.get(chosenParkId).size() == 0) {
+        if (rates.get(chosenParkId) == null || rates.get(chosenParkId).size() == 0) {
           Color.error("Nav tarifu");
           break;
         }
@@ -443,7 +446,7 @@ public class UserInterface {
             price_width = String.valueOf(p.price()).length();
         }
 
-        List<Integer> max_column_widths = List.of(id_width, 7, 13, price_width, 14, 12, 11, 8);
+        List<Integer> max_column_widths = List.of(id_width, 9, 14, price_width, 14, 12, 11, 8);
 
         Table.printTable(columnNames, max_column_widths, List.copyOf(rates.get(chosenParkId)));
         break;
@@ -531,6 +534,8 @@ public class UserInterface {
       ArrayList<Park> parkArray = parkFile.loadAll();
       for (Park park : parkArray) {
         parks.put(park.id(), park);
+        if (park.id() >= newId)
+          newId = park.id() + 1;
       }
     } catch (Exception e) {
       Color.warn("Neizdevās ielādēt autostāvvietu: " + e);
@@ -545,6 +550,8 @@ public class UserInterface {
         if (!rates.containsKey(rate.parkId())) {
           rates.put(rate.parkId(), new ArrayList<>());
         }
+        if (rate.id() >= newId)
+          newId = rate.id() + 1;
         ArrayList<Rate> temp = rates.get(rate.parkId());
         temp.add(rate);
         rates.put(rate.parkId(), temp);

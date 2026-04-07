@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 enum RateType {
   PerHour,
   DayPart,
-  DayWhole,
+  Night,
   MonthWhole,
-  MonthPart,
   DaysMultiple,
-  HoursMultiple
+  HoursMultiple,
+  MonthsMultiple
 }
 
 public class Rate implements CSVEncodable, TablePrintable {
@@ -70,9 +70,9 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     choices = new ArrayList<>(
         Arrays.asList("Izveidot stundas tipa tarifu", "Izveidot dienas posma tipa tarifu",
-            "Izveidot pilnas dienas tipa tarifu", "Izveidot pilna mēneša tipa tarifu",
-            "Izveidot mēneša perioda tipa tarifu", "Izveidot vairāku dienu tipa tarifu",
-            "Izveidot vairaaku stundu tipa tarifu", "Atpakal"));
+            "Izveidot nakts tipa tarifu", "Izveidot mēneša tipa tarifu",
+            "Izveidot vairāku dienu tipa tarifu",
+            "Izveidot vairāku stundu tipa tarifu", "Izveidot vairāku menešu tipa tarifu", "Atpakal"));
     choice = Menu.printMenu(
         scanner, choices);
 
@@ -85,16 +85,16 @@ public class Rate implements CSVEncodable, TablePrintable {
         rateType = RateType.DayPart;
         break;
       case 3:
-        rateType = RateType.DayWhole;
+        rateType = RateType.Night;
         break;
       case 4:
         rateType = RateType.MonthWhole;
         break;
       case 5:
-        rateType = RateType.MonthPart;
+        rateType = RateType.DaysMultiple;
         break;
       case 6:
-        rateType = RateType.DaysMultiple;
+        rateType = RateType.HoursMultiple;
         break;
       case 7:
         rateType = RateType.HoursMultiple;
@@ -119,24 +119,24 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     LocalTime startTime = LocalTime.MIDNIGHT;
     LocalTime endTime = startTime;
-    if (rateType != RateType.DayWhole) {
-      System.out.print("Ievadi laiku, kad tarifs saka darboties (hh:mm): ");
-      try {
-        startTime = LocalTime.parse(scanner.nextLine());
-      } catch (Exception e) {
-        throw new Exception("Sakuma laiks nav pareizi ievadits!");
+    System.out.print("Ievadi laiku, kad tarifs saka darboties (hh:mm) vai nospied Enter: ");
+    try {
+      String in = scanner.nextLine();
+      if (!in.isEmpty()) {
+        startTime = LocalTime.parse(in);
       }
+    } catch (Exception e) {
+      throw new Exception("Sakuma laiks nav pareizi ievadits!");
+    }
 
-      System.out.print("Ievadi laiku, kad tarifs beidz darboties (hh:mm): ");
-      try {
-        endTime = LocalTime.parse(scanner.nextLine());
-      } catch (Exception e) {
-        throw new Exception("Beigu laiks nav pareizi ievadits!");
+    System.out.print("Ievadi laiku, kad tarifs beidz darboties (hh:mm) vai nospied Enter: ");
+    try {
+      String in = scanner.nextLine();
+      if (!in.isEmpty()) {
+        endTime = LocalTime.parse(in);
       }
-
-      if (endTime.isBefore(startTime)) {
-        throw new Exception("Beigu laiks nevar but mazaks par sakuma laiku!");
-      }
+    } catch (Exception e) {
+      throw new Exception("Beigu laiks nav pareizi ievadits!");
     }
 
     int multipleCount = 1;
