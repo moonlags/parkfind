@@ -1,5 +1,6 @@
 // TODO: hash passwords
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -37,7 +38,7 @@ public class UserInterface {
     parks = new HashMap<>();
     rates = new HashMap<>();
 
-    scanner = new Scanner(System.in);
+    scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
     userFile = new FileHandler<>("data/users.csv", User::fromCSV);
     parkFile = new FileHandler<>("data/parks.csv", Park::fromCSV);

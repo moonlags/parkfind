@@ -7,12 +7,9 @@ import java.util.stream.Collectors;
 
 // TODO: add toString methods
 enum RateType {
-  PerHour,
-  DayPart,
-  MonthWhole,
-  DaysMultiple,
-  HoursMultiple,
-  MonthsMultiple
+  Hour,
+  Day,
+  Month,
 }
 
 public class Rate implements CSVEncodable, TablePrintable {
@@ -23,7 +20,7 @@ public class Rate implements CSVEncodable, TablePrintable {
   private float price;
   private LocalTime startTime;
   private LocalTime endTime;
-  private int multipleCount;
+  private int amount;
   private byte weekDays;
   private float freeHours;
 
@@ -33,7 +30,7 @@ public class Rate implements CSVEncodable, TablePrintable {
   // LocalTime tipa vērtību endTime, int tipa vērtību mutipleCount, byte tipa
   // vērtību weekDays un neatgriež nekādu vērtību
   public Rate(int id, int parkId, AutoType autoType, RateType rateType, float price, LocalTime startTime,
-      LocalTime endTime, int multipleCount, byte weekDays, float freeHours) {
+      LocalTime endTime, int amount, byte weekDays, float freeHours) {
     this.id = id;
     this.parkId = parkId;
     this.autoType = autoType;
@@ -41,7 +38,7 @@ public class Rate implements CSVEncodable, TablePrintable {
     this.price = price;
     this.startTime = startTime;
     this.endTime = endTime;
-    this.multipleCount = multipleCount;
+    this.amount = amount;
     this.weekDays = weekDays;
     this.freeHours = freeHours;
   }
@@ -76,36 +73,25 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     choices = new ArrayList<>(
         Arrays.asList("Izveidot stundas tipa tarifu", "Izveidot dienas posma tipa tarifu",
-            "Izveidot mēneša tipa tarifu",
-            "Izveidot vairāku dienu tipa tarifu",
-            "Izveidot vairāku stundu tipa tarifu", "Izveidot vairāku menešu tipa tarifu", "Atpakal"));
+            "Izveidot mēneša tipa tarifu", "Atpakal"));
     choice = Menu.printMenu(
         scanner, choices);
 
     RateType rateType;
     switch (choice) {
       case 1:
-        rateType = RateType.PerHour;
+        rateType = RateType.Hour;
         break;
       case 2:
-        rateType = RateType.DayPart;
+        rateType = RateType.Day;
         break;
       case 3:
-        rateType = RateType.MonthWhole;
+        rateType = RateType.Month;
         break;
       case 4:
-        rateType = RateType.DaysMultiple;
-        break;
-      case 5:
-        rateType = RateType.HoursMultiple;
-        break;
-      case 6:
-        rateType = RateType.HoursMultiple;
-        break;
-      case 7:
         throw new Exception("Tarifa izveide ir aptureta!");
       default:
-        rateType = RateType.PerHour;
+        rateType = RateType.Hour;
     }
 
     System.out.print("Ievadi pilnu cenu: ");
@@ -121,7 +107,7 @@ public class Rate implements CSVEncodable, TablePrintable {
     }
 
     float freeHours = 0;
-    if (rateType == RateType.PerHour) {
+    if (rateType == RateType.Hour) {
       System.out.print("Ievadi bezmaksas stundu daudzumu: ");
       try {
         freeHours = Float.valueOf(scanner.nextLine());
@@ -132,7 +118,7 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     LocalTime startTime = LocalTime.MIDNIGHT;
     LocalTime endTime = startTime;
-    System.out.print("Ievadi laiku, kad tarifs saka darboties (hh:mm) vai nospied Enter: ");
+    System.out.print("Ievadi laiku, kad tarifs saka darboties (piem. 05:34) vai nospied Enter: ");
     try {
       String in = scanner.nextLine();
       if (!in.isEmpty()) {
@@ -142,7 +128,7 @@ public class Rate implements CSVEncodable, TablePrintable {
       throw new Exception("Sakuma laiks nav pareizi ievadits!");
     }
 
-    System.out.print("Ievadi laiku, kad tarifs beidz darboties (hh:mm) vai nospied Enter: ");
+    System.out.print("Ievadi laiku, kad tarifs beidz darboties (piem. 18:02) vai nospied Enter: ");
     try {
       String in = scanner.nextLine();
       if (!in.isEmpty()) {
@@ -152,18 +138,16 @@ public class Rate implements CSVEncodable, TablePrintable {
       throw new Exception("Beigu laiks nav pareizi ievadits!");
     }
 
+    System.out.print("Ievadi stundu/dienu/menēšu daudzumu: ");
     int multipleCount = 1;
-    if (rateType == RateType.DaysMultiple || rateType == RateType.HoursMultiple) {
-      System.out.print("Ievadi daudzumu: ");
-      try {
-        multipleCount = Integer.valueOf(scanner.nextLine());
-      } catch (Exception e) {
-        throw new Exception("Daudzumam ir jabut naturalajam skaitlim");
-      }
+    try {
+      multipleCount = Integer.valueOf(scanner.nextLine());
+    } catch (Exception e) {
+      throw new Exception("Daudzumam ir jabut naturalajam skaitlim");
+    }
 
-      if (multipleCount <= 0) {
-        throw new Exception("Daudzumam ir jabut pozitivam!");
-      }
+    if (multipleCount <= 0) {
+      throw new Exception("Daudzumam ir jabut pozitivam!");
     }
 
     System.out.print("Ievadi nedelas dienas, kad tarifs ir aktivs (piem. \'1,5,7\'), vai \'visas\': ");
@@ -202,7 +186,7 @@ public class Rate implements CSVEncodable, TablePrintable {
   // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību toCSV
   public String toCSV() {
     return id + "," + parkId + "," + autoType.name() + "," + rateType.name() + "," + price + "," + startTime + ","
-        + endTime + "," + multipleCount + "," + weekDays + "," + freeHours + "\n";
+        + endTime + "," + amount + "," + weekDays + "," + freeHours + "\n";
   }
 
   // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež
@@ -224,7 +208,7 @@ public class Rate implements CSVEncodable, TablePrintable {
     }
     wkd = wkd.substring(0, wkd.length() - 1);
 
-    return String.format(formatString, id, autoType, rateType, price, wkd, startTime, endTime, multipleCount,
+    return String.format(formatString, id, autoType, rateType, price, wkd, startTime, endTime, amount,
         freeHours);
   }
 
@@ -247,10 +231,10 @@ public class Rate implements CSVEncodable, TablePrintable {
     float price = Float.valueOf(fields[4]);
     LocalTime startTime = LocalTime.parse(fields[5]);
     LocalTime endTime = LocalTime.parse(fields[6]);
-    int multipleCount = Integer.valueOf(fields[7]);
+    int amount = Integer.valueOf(fields[7]);
     byte weekDays = Byte.valueOf(fields[8]);
     float freeHours = Float.valueOf(fields[9]);
 
-    return new Rate(id, parkId, autoType, rateType, price, startTime, endTime, multipleCount, weekDays, freeHours);
+    return new Rate(id, parkId, autoType, rateType, price, startTime, endTime, amount, weekDays, freeHours);
   }
 }
