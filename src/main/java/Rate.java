@@ -27,11 +27,11 @@ public class Rate implements CSVEncodable, TablePrintable {
   private byte weekDays;
   private float freeHours;
 
-  // funkcija Rate pieņem int tipa vērtību id, AutoType tipa vērtību autoType,
+  // funkcija Rate pieņem int tipa vērtību id, int tipa vērtību parkId, AutoType tipa vērtību autoType,
   // RateType tipa vērtību rateType, float tipa vērtību price, LocalTime tipa
   // vērtību startTime,
   // LocalTime tipa vērtību endTime, int tipa vērtību mutipleCount, byte tipa
-  // vērtību weekDays un neatgriež nekādu vērtību
+  // vērtību weekDays, float tipa vērtību freeHours un neatgriež nekādu vērtību
   public Rate(int id, int parkId, AutoType autoType, RateType rateType, float price, LocalTime startTime,
       LocalTime endTime, int multipleCount, byte weekDays, float freeHours) {
     this.id = id;
@@ -76,9 +76,9 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     choices = new ArrayList<>(
         Arrays.asList("Izveidot stundas tipa tarifu", "Izveidot dienas posma tipa tarifu",
-            "Izveidot mēneša tipa tarifu",
-            "Izveidot vairāku dienu tipa tarifu",
-            "Izveidot vairāku stundu tipa tarifu", "Izveidot vairāku menešu tipa tarifu", "Atpakal"));
+            "Izveidot menesa tipa tarifu",
+            "Izveidot vairaku dienu tipa tarifu",
+            "Izveidot vairaku stundu tipa tarifu", "Izveidot vairaku menesu tipa tarifu", "Atpakal"));
     choice = Menu.printMenu(
         scanner, choices);
 
@@ -126,7 +126,7 @@ public class Rate implements CSVEncodable, TablePrintable {
       try {
         freeHours = Float.valueOf(scanner.nextLine());
       } catch (Exception e) {
-        throw new Exception("Bezmaksas stundas daudzums nav pareizi uzrakstīts!");
+        throw new Exception("Bezmaksas stundas daudzums nav pareizi uzrakstits!");
       }
     }
 
