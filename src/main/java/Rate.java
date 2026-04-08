@@ -60,6 +60,10 @@ public class Rate implements CSVEncodable, TablePrintable {
     return price;
   }
 
+  public byte weekDays() {
+    return weekDays;
+  }
+
   public RateType rateType() {
     return rateType;
   }
