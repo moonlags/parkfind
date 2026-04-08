@@ -8,7 +8,7 @@ interface TablePrintable {
 public class Table {
 	// funkcija printTable pieņem List<String> tipa vērtību columnNames,
 	// List<Integer> tipa vērtību maxColumnWidths,
-	// List<TablePrintable> tipa vērtību elems un atgriež nevienu vērtību
+	// List<? extends TablePrintable> tipa vērtību elems un atgriež nevienu vērtību
 	public static void printTable(List<String> columnNames, List<Integer> maxColumnWidths,
 			List<? extends TablePrintable> elems) {
 		String separator = separator(maxColumnWidths);
