@@ -45,7 +45,7 @@ public class UserInterface {
     rateFile = new FileHandler<>("data/rates.csv", Rate::fromCSV);
 
     page = this::loginPage;
-    newId = 1; // TODO: load from file
+    newId = 1;
   }
 
   // funkcija userPage atgriež HandlerFn tipa vērtību

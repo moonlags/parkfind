@@ -5,11 +5,22 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-// TODO: add toString methods
 enum RateType {
-  Hour,
-  Day,
-  Month,
+  Hour {
+    public String toString() {
+      return "Stundas";
+    }
+  },
+  Day {
+    public String toString() {
+      return "Dienas posma";
+    }
+  },
+  Month {
+    public String toString() {
+      return "Menēša";
+    }
+  },
 }
 
 public class Rate implements CSVEncodable, TablePrintable {
@@ -49,6 +60,26 @@ public class Rate implements CSVEncodable, TablePrintable {
     return price;
   }
 
+  public RateType rateType() {
+    return rateType;
+  }
+
+  public LocalTime startTime() {
+    return startTime;
+  }
+
+  public LocalTime endTime() {
+    return endTime;
+  }
+
+  public float freeHours() {
+    return freeHours;
+  }
+
+  public int amount() {
+    return amount;
+  }
+
   // funkcija enterNew pieņem Scanner tipa vērtību scanner, int tipa vērtību id,
   // int tipa vērtību parkId un atgriež Rate tipa vērtību rate
   public static Rate enterNew(Scanner scanner, int id, int parkId) throws Exception {
@@ -66,10 +97,8 @@ public class Rate implements CSVEncodable, TablePrintable {
       case 2:
         autoType = AutoType.Electro;
         break;
-      case 3:
-        throw new Exception("Tarifa izveide ir aptureta!");
       default:
-        autoType = AutoType.Any;
+        throw new Exception("Tarifa izveide ir aptureta!");
     }
 
     choices = new ArrayList<>(
@@ -89,10 +118,8 @@ public class Rate implements CSVEncodable, TablePrintable {
       case 3:
         rateType = RateType.Month;
         break;
-      case 4:
-        throw new Exception("Tarifa izveide ir aptureta!");
       default:
-        rateType = RateType.Hour;
+        throw new Exception("Tarifa izveide ir aptureta!");
     }
 
     System.out.print("Ievadi pilnu cenu: ");
@@ -117,9 +144,8 @@ public class Rate implements CSVEncodable, TablePrintable {
       }
     }
 
-    LocalTime startTime = LocalTime.MIDNIGHT;
-    LocalTime endTime = startTime;
     System.out.print("Ievadi laiku, kad tarifs saka darboties (piem. 05:34) vai nospied Enter: ");
+    LocalTime startTime = LocalTime.MIDNIGHT;
     try {
       String in = scanner.nextLine();
       if (!in.isEmpty()) {
@@ -130,6 +156,7 @@ public class Rate implements CSVEncodable, TablePrintable {
     }
 
     System.out.print("Ievadi laiku, kad tarifs beidz darboties (piem. 18:02) vai nospied Enter: ");
+    LocalTime endTime = startTime;
     try {
       String in = scanner.nextLine();
       if (!in.isEmpty()) {

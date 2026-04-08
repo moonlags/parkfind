@@ -1,6 +1,31 @@
 import java.util.Scanner;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+
+class SearchResult {
+    private Park park;
+    private Rate rate;
+    private float price;
+
+    SearchResult(Park park, Rate rate, float price) {
+        this.park = park;
+        this.rate = rate;
+        this.price = price;
+    }
+
+    public float price() {
+        return price;
+    }
+}
 
 public class Park implements CSVEncodable, TablePrintable {
     private int id;
@@ -18,7 +43,8 @@ public class Park implements CSVEncodable, TablePrintable {
         this.district = district;
     }
 
-     // funkcija enterNew pieņem Scanner tipa vērtību scanner un int tipa vērtību id un atgriež Park tipa vērtību park
+    // funkcija enterNew pieņem Scanner tipa vērtību scanner un int tipa vērtību id
+    // un atgriež Park tipa vērtību park
     public static Park enterNew(Scanner scanner, int id) throws Exception {
         System.out.println("Ievadiet autostavvietas datus vai \'iziet\'!");
         System.out.print("Ievadi nosaukumu: ");
@@ -39,6 +65,111 @@ public class Park implements CSVEncodable, TablePrintable {
         Park park = new Park(id, name, address, district);
 
         return park;
+    }
+
+    // TODO: garumzimes check
+    public static ArrayList<Park> findBestParkings(Scanner scanner, HashMap<Integer, Park> parks,
+            HashMap<Integer, ArrayList<Rate>> rates, AutoType autoType) throws Exception {
+        System.out
+                .print("Ievadi laiku un datumu, kad plāno atstāt automašinu autostāvvietā (piem. 09:49 08.04.2026) vai nospied Enter: ");
+        LocalDateTime startTime = LocalDateTime.now();
+        try {
+            String in = scanner.nextLine();
+            if (!in.isEmpty()) {
+                startTime = LocalDateTime.parse(in);
+            }
+        } catch (Exception e) {
+            throw new Exception("Sakuma laiks nav pareizi ievadits!");
+        }
+
+        if (startTime.isBefore(LocalDateTime.now()))
+            throw new Exception("Sākuma laiks nevar būt pagatnē!");
+
+        System.out
+                .print("Ievadi paredzemo beigu laiku un datumu, kad izbraukt no autostāvvietas (piem. 10:03 09.04.2026): ");
+        LocalDateTime endTime = LocalDateTime.now();
+        try {
+            endTime = LocalDateTime.parse(scanner.nextLine());
+        } catch (Exception e) {
+            throw new Exception("Beigu laiks nav pareizi ievadits!");
+        }
+
+        if (endTime.isBefore(startTime))
+            throw new Exception("Beigu laiks nevvar būt mazāks par sākuma laiku!");
+
+        HashSet<String> districts = new HashSet<>();
+        for (Park park : parks.values()) {
+            districts.add(park.district);
+        }
+        ArrayList<String> choices = new ArrayList<>();
+        choices.add("Iziet");
+        choices.addAll(districts);
+
+        System.out.println("Izvēlies rajonu!");
+        int choice = Menu.printMenu(scanner, choices);
+
+        String district;
+        switch (choice) {
+            case 1:
+                throw new Exception("Autostāvvietas meklēšana apturēta!");
+            default:
+                district = choices.get(choice);
+                break;
+        }
+
+        ArrayList<Park> parksInSameDistrict = new ArrayList<>();
+        for (Park p : parks.values()) {
+            if (p.district == district)
+                parksInSameDistrict.add(p);
+        }
+
+        long months = ChronoUnit.MONTHS.between(startTime, endTime);
+        if (startTime.getDayOfMonth() != endTime.getDayOfMonth())
+            months++;
+
+        long days = ChronoUnit.DAYS.between(startTime, endTime);
+        if (startTime.getHour() != endTime.getHour())
+            days++;
+
+        long hours = ChronoUnit.HOURS.between(startTime, endTime);
+        if (startTime.getMinute() != endTime.getMinute())
+            hours++;
+
+        TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
+        for (Park park : parksInSameDistrict) {
+            for (Rate rate : rates.get(park.id)) {
+                double price;
+                switch (rate.rateType()) {
+                    case Hour:
+                        double billableHours = Math.max(0.0, hours - rate.freeHours());
+                        int payments = 0;
+                        if (billableHours > 0) {
+                            double raw = billableHours / rate.amount(); // rate.amount() is the billing unit (hours)
+                            payments = (int) Math.ceil(raw); // round up to next whole payment unit
+                        }
+
+                        // TODO: add check for weekdays
+
+                        if (!rate.startTime().equals(rate.endTime()) && days > 1) {
+                            boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
+                            boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
+                            if (startOutside || endOutside) {
+                                throw new IllegalArgumentException(
+                                        "Session spans multiple days outside the allowed rate window.");
+                            }
+                        }
+
+                        price = rate.price() * payments;
+                        break;
+                    case Day:
+
+                        break;
+                    case Month:
+
+                        break;
+                }
+            }
+        }
     }
 
     // funkcija atgriež int tipa vērtību id
@@ -101,7 +232,8 @@ public class Park implements CSVEncodable, TablePrintable {
         return String.format(formatString, id, name, address, district);
     }
 
-    // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež Park tipa vērtību park
+    // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež Park tipa
+    // vērtību park
     public static Park fromCSV(String csvdata) throws Exception {
         String[] fields = csvdata.split(",");
         if (fields.length < 4) {
