@@ -11,30 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class SearchResult {
-    private Park park;
-    private Rate rate;
-    private double price;
-
-    SearchResult(Park park, Rate rate, double price) {
-        this.park = park;
-        this.rate = rate;
-        this.price = price;
-    }
-
-    public double price() {
-        return price;
-    }
-
-    public Park park() {
-        return park;
-    }
-
-    public Rate rate() {
-        return rate;
-    }
-}
-
 public class Park implements CSVEncodable, TablePrintable {
     private int id;
     private String name;
@@ -110,7 +86,8 @@ public class Park implements CSVEncodable, TablePrintable {
             districts.add(park.district);
         }
         ArrayList<String> choices = new ArrayList<>();
-        choices.add("Iziet");
+        // TODO: garumzimes
+        choices.add("Atpakal");
         choices.addAll(districts);
 
         System.out.println("Izvēlies rajonu!");
@@ -121,7 +98,7 @@ public class Park implements CSVEncodable, TablePrintable {
             case 1:
                 throw new Exception("Autostāvvietas meklēšana apturēta!");
             default:
-                district = choices.get(choice);
+                district = choices.get(choice - 2);
                 break;
         }
 
@@ -146,29 +123,48 @@ public class Park implements CSVEncodable, TablePrintable {
         TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
         for (Park park : parksInSameDistrict) {
             for (Rate rate : rates.get(park.id)) {
+                int payments = 0;
+
                 switch (rate.rateType()) {
                     case Hour:
-                        try {
-                            double price = calculateHour(rate, hours, days, startTime, endTime);
-                            results.add(new SearchResult(park, rate, price));
-                        } catch (Exception e) {
-                        }
+                        double billableHours = Math.max(0.0, hours - rate.freeHours());
+                        if (billableHours <= 0)
+                            break;
+
+                        double rawHours = billableHours / rate.amount(); // rate.amount() is the billing unit (hours)
+                        payments = (int) Math.ceil(rawHours); // round up to next whole payment unit
                         break;
                     case Day:
-                        try {
-                            double price = calculateDay(rate, days, startTime, endTime);
-                            results.add(new SearchResult(park, rate, price));
-                        } catch (Exception e) {
-                        }
+                        double rawDays = (double) days / rate.amount(); // rate.amount() is the billing unit (days)
+                        payments = (int) Math.ceil(rawDays); // round up to next whole payment unit
                         break;
                     case Month:
-                        try {
-                            double price = calculateMonth(rate, days, months, startTime, endTime);
-                            results.add(new SearchResult(park, rate, price));
-                        } catch (Exception e) {
-                        }
+                        double rawMonths = (double) months / rate.amount(); // rate.amount() is the billing unit
+                                                                            // (months)
+                        payments = (int) Math.ceil(rawMonths); // round up to next whole payment unit
                         break;
                 }
+
+                byte rateWeekdays = rate.weekDays(); // e.g., 00000101b means Monday+Wednesday
+                LocalDate cur = startTime.toLocalDate();
+                LocalDate end = endTime.toLocalDate();
+                // iterate each date covered by the booking; stop if any date not allowed
+                while (!cur.isAfter(end)) {
+                    if (!isDateAllowedByWeekdays(cur, rateWeekdays)) {
+                        throw new Exception();
+                    }
+                    cur = cur.plusDays(1);
+                }
+
+                if (!rate.startTime().equals(rate.endTime()) && days > 1) {
+                    boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
+                    boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
+                    if (startOutside || endOutside)
+                        throw new Exception();
+                }
+
+                double price = rate.price() * payments;
+                results.add(new SearchResult(park, rate, price));
             }
         }
 
@@ -178,99 +174,6 @@ public class Park implements CSVEncodable, TablePrintable {
             top5.add(it.next());
 
         return top5;
-    }
-
-    private static double calculateHour(Rate rate, long hours, long days, LocalDateTime startTime,
-            LocalDateTime endTime)
-            throws Exception {
-        double billableHours = Math.max(0.0, hours - rate.freeHours());
-        int payments = 0;
-
-        if (billableHours <= 0)
-            throw new Exception();
-
-        double raw = billableHours / rate.amount(); // rate.amount() is the billing unit (hours)
-        payments = (int) Math.ceil(raw); // round up to next whole payment unit
-
-        byte rateWeekdays = rate.weekDays(); // e.g., 00000101b means Monday+Wednesday
-        LocalDate cur = startTime.toLocalDate();
-        LocalDate end = endTime.toLocalDate();
-        // iterate each date covered by the booking; stop if any date not allowed
-        while (!cur.isAfter(end)) {
-            if (!isDateAllowedByWeekdays(cur, rateWeekdays)) {
-                throw new Exception();
-            }
-            cur = cur.plusDays(1);
-        }
-
-        if (!rate.startTime().equals(rate.endTime()) && days > 1) {
-            boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
-            boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
-            if (startOutside || endOutside)
-                throw new Exception();
-        }
-
-        double price = rate.price() * payments;
-        return price;
-
-    }
-
-    private static double calculateDay(Rate rate, long days, LocalDateTime startTime,
-            LocalDateTime endTime)
-            throws Exception {
-        int payments = 0;
-        double raw = (double) days / rate.amount(); // rate.amount() is the billing unit (hours)
-        payments = (int) Math.ceil(raw); // round up to next whole payment unit
-
-        byte rateWeekdays = rate.weekDays(); // e.g., 00000101b means Monday+Wednesday
-        LocalDate cur = startTime.toLocalDate();
-        LocalDate end = endTime.toLocalDate();
-        // iterate each date covered by the booking; stop if any date not allowed
-        while (!cur.isAfter(end)) {
-            if (!isDateAllowedByWeekdays(cur, rateWeekdays)) {
-                throw new Exception();
-            }
-            cur = cur.plusDays(1);
-        }
-
-        if (!rate.startTime().equals(rate.endTime()) && days > 1) {
-            boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
-            boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
-            if (startOutside || endOutside)
-                throw new Exception();
-        }
-
-        double price = rate.price() * payments;
-        return price;
-    }
-
-    private static double calculateMonth(Rate rate, long days, long months, LocalDateTime startTime,
-            LocalDateTime endTime)
-            throws Exception {
-        int payments = 0;
-        double raw = (double) months / rate.amount(); // rate.amount() is the billing unit (hours)
-        payments = (int) Math.ceil(raw); // round up to next whole payment unit
-
-        byte rateWeekdays = rate.weekDays(); // e.g., 00000101b means Monday+Wednesday
-        LocalDate cur = startTime.toLocalDate();
-        LocalDate end = endTime.toLocalDate();
-        // iterate each date covered by the booking; stop if any date not allowed
-        while (!cur.isAfter(end)) {
-            if (!isDateAllowedByWeekdays(cur, rateWeekdays)) {
-                throw new Exception();
-            }
-            cur = cur.plusDays(1);
-        }
-
-        if (!rate.startTime().equals(rate.endTime()) && days > 1) {
-            boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
-            boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
-            if (startOutside || endOutside)
-                throw new Exception();
-        }
-
-        double price = rate.price() * payments;
-        return price;
     }
 
     private static boolean isDateAllowedByWeekdays(LocalDate date, byte weekdays) {

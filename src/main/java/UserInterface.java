@@ -1,12 +1,14 @@
 // TODO: hash passwords
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.*;
 
 @FunctionalInterface
 interface HandlerFn {
@@ -17,6 +19,7 @@ interface HandlerFn {
 public class UserInterface {
   private HandlerFn page;
   private User curr;
+  private AutoType chosenAutoType;
 
   private int chosenParkId;
 
@@ -48,6 +51,66 @@ public class UserInterface {
     newId = 1;
   }
 
+  private SearchResult chooseSearchResult(ArrayList<SearchResult> options) throws Exception {
+    List<String> columnNames = List.of("Adrese", "Tarifa tips", "Cena");
+
+    int address_width = 6;
+    for (SearchResult res : options) {
+      if (res.park().address().length() > address_width)
+        address_width = res.park().address().length();
+    }
+
+    List<Integer> max_column_widths = List.of(address_width, 12, 7);
+    Table.printTable(columnNames, max_column_widths, options);
+
+    ArrayList<String> choices = new ArrayList<>();
+    // TODO: garumzimes
+    choices.add("Atpakal");
+    for (SearchResult res : options) {
+      choices.add(res.park().address());
+    }
+
+    System.out.println("Izvēlies autostavvietu!");
+    int choice = Menu.printMenu(scanner, choices);
+
+    switch (choice) {
+      case 1:
+        // TODO: garumzimes
+        throw new Exception("Taimera startesana apturēta!");
+      default:
+        return options.get(choice - 2);
+    }
+  }
+
+  private void startTimer(Scanner scanner, SearchResult chosen) {
+    ExecutorService ex = Executors.newSingleThreadExecutor();
+    Future<Void> f = ex.submit(() -> {
+      scanner.nextLine();
+      return null;
+    });
+
+    LocalDateTime startTime = LocalDateTime.now();
+    double price = 0;
+
+    try {
+      f.get(1, TimeUnit.SECONDS); // wait up to 1s
+      // enter recieved close timer
+      // print out final price, start time, endtime, time spent
+      // save history
+      // exit
+    } catch (Exception e) {
+      clearConsole();
+      System.out.println(
+          "Jus jau stavejat autostavvieta ar adresi dasdasd 5s un esat samaksajat 5 eur!\nUzspiediet ENTER lai pabeigtu:");
+      // no enter recived
+      // print updated info to terminal
+      // current price and time parking
+      f.cancel(true);
+    } finally {
+      ex.shutdownNow();
+    }
+  }
+
   // funkcija userPage atgriež HandlerFn tipa vērtību
   private HandlerFn userPage() {
     ArrayList<String> choices = new ArrayList<>(
@@ -57,7 +120,25 @@ public class UserInterface {
 
     switch (choice) {
       case 1:
-        // TODO: implement
+        clearConsole();
+
+        ArrayList<SearchResult> results;
+        try {
+          results = Park.findBestParkings(scanner, parks, rates, chosenAutoType);
+        } catch (Exception e) {
+          Color.error(e.getMessage());
+          break;
+        }
+
+        SearchResult chosen;
+        try {
+          chosen = chooseSearchResult(results);
+        } catch (Exception e) {
+          Color.error(e.getMessage());
+          break;
+        }
+
+        startTimer(scanner, chosen);
         break;
       case 2:
         clearConsole();
@@ -574,16 +655,16 @@ public class UserInterface {
     }
   }
 
-   // funkcija saveParks neko nepieņem un neko neatgriež
+  // funkcija saveParks neko nepieņem un neko neatgriež
   private void saveParks() {
     try {
       parkFile.writeAll(parks.values());
     } catch (Exception e) {
-      Color.warn("Neizdevas autostavvietas pievienot failos: " + e); 
+      Color.warn("Neizdevas autostavvietas pievienot failos: " + e);
     }
   }
 
-   // funkcija saveRates neko nepieņem un neko neatgriež
+  // funkcija saveRates neko nepieņem un neko neatgriež
   private void saveRates() {
     try {
       for (ArrayList<Rate> ratesForParks : rates.values()) {
