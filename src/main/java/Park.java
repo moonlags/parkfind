@@ -150,18 +150,23 @@ public class Park implements CSVEncodable, TablePrintable {
                 LocalDate cur = startTime.toLocalDate();
                 LocalDate end = endTime.toLocalDate();
                 // iterate each date covered by the booking; stop if any date not allowed
+                boolean allowedWeekdays = true;
                 while (!cur.isAfter(end)) {
                     if (!Util.isDateAllowedByWeekdays(cur, rateWeekdays)) {
-                        throw new Exception();
+                        allowedWeekdays = false;
+                        break;
                     }
                     cur = cur.plusDays(1);
                 }
+
+                if (!allowedWeekdays)
+                    break;
 
                 if (!rate.startTime().equals(rate.endTime()) && days > 1) {
                     boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
                     boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
                     if (startOutside || endOutside)
-                        throw new Exception();
+                        break;
                 }
 
                 double price = rate.price() * payments;
