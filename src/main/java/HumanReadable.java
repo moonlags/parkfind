@@ -43,6 +43,6 @@ public class HumanReadable {
             return;
         if (sb.length() > 0)
             sb.append(", ");
-        sb.append(value).append(' ').append(unit).append(value == 1 ? "" : "s");
+        sb.append(value).append(' ').append(unit);
     }
 }

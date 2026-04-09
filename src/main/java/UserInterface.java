@@ -133,7 +133,7 @@ public class UserInterface {
             }
           }
 
-          System.out.println("Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " "
+          System.out.println("Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " - "
               + HumanReadable.formatInterval(startTime, timeNow)
               + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
           // allow loop to resubmit new read task
@@ -146,6 +146,10 @@ public class UserInterface {
 
       if (finalEndTime == null)
         finalEndTime = LocalDateTime.now();
+
+      if (!parkings.containsKey(curr.email())) {
+        parkings.put(curr.email(), new ArrayList<>());
+      }
 
       ArrayList<Parking> temp = parkings.get(curr.email());
       Parking parking = new Parking(newId, startTime, finalEndTime,
@@ -644,7 +648,7 @@ public class UserInterface {
             return this::userPage;
           }
         } catch (Exception e) {
-          System.out.println(e.getMessage());
+          Color.error(e.getMessage());
         }
         break;
       case 3:

@@ -62,12 +62,13 @@ public class Park implements CSVEncodable, TablePrintable {
             String in = scanner.nextLine();
             if (!in.isEmpty()) {
                 startTime = LocalDateTime.parse(in, DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
-                if (startTime.isBefore(LocalDateTime.now()))
-                    throw new Exception("Sākuma laiks nevar būt pagatnē!");
             }
         } catch (Exception e) {
             throw new Exception("Sakuma laiks nav pareizi ievadits!");
         }
+
+        if (startTime.isBefore(LocalDateTime.now()))
+            throw new Exception("Sākuma laiks nevar būt pagatnē!");
 
         System.out
                 .print("Ievadi paredzemo beigu laiku un datumu, kad izbraukt no autostāvvietas (piem. 10:03 09.04.2026): ");
@@ -108,20 +109,15 @@ public class Park implements CSVEncodable, TablePrintable {
                 parksInSameDistrict.add(p);
         }
 
-        long months = ChronoUnit.MONTHS.between(startTime, endTime);
-        if (startTime.getDayOfMonth() != endTime.getDayOfMonth())
-            months++;
-
-        long days = ChronoUnit.DAYS.between(startTime, endTime);
-        if (startTime.getHour() != endTime.getHour())
-            days++;
-
-        long hours = ChronoUnit.HOURS.between(startTime, endTime);
-        if (startTime.getMinute() != endTime.getMinute())
-            hours++;
+        long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+        long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+        long hours = ChronoUnit.HOURS.between(startTime, endTime) + 1;
 
         TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
         for (Park park : parksInSameDistrict) {
+            if (!rates.containsKey(park.id))
+                continue;
+
             for (Rate rate : rates.get(park.id)) {
                 int payments = 0;
 
@@ -159,13 +155,18 @@ public class Park implements CSVEncodable, TablePrintable {
                 }
 
                 if (!allowedWeekdays)
-                    break;
+                    continue;
 
                 if (!rate.startTime().equals(rate.endTime()) && days > 1) {
                     boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
                     boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
                     if (startOutside || endOutside)
+                        continue;
+
+                    if (startTime.toLocalTime().isAfter(endTime.toLocalTime())
+                            && !rate.startTime().isAfter(rate.endTime())) { // night rate
                         break;
+                    }
                 }
 
                 double price = rate.price() * payments;
@@ -246,7 +247,7 @@ public class Park implements CSVEncodable, TablePrintable {
     public static Park fromCSV(String csvdata) throws Exception {
         String[] fields = csvdata.split(",");
         if (fields.length < 4) {
-            throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 4");
+            throw new Exception("Invalid csv fields: got " + fields.length + " expected 4");
         }
         int id = Integer.valueOf(fields[0]);
         String name = fields[1];

@@ -88,17 +88,9 @@ public class Rate implements CSVEncodable, TablePrintable {
   }
 
   public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime) {
-    long months = ChronoUnit.MONTHS.between(startTime, endTime);
-    if (startTime.getDayOfMonth() != endTime.getDayOfMonth())
-      months++;
-
-    long days = ChronoUnit.DAYS.between(startTime, endTime);
-    if (startTime.getHour() != endTime.getHour())
-      days++;
-
-    long hours = ChronoUnit.HOURS.between(startTime, endTime);
-    if (startTime.getMinute() != endTime.getMinute())
-      hours++;
+    long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+    long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+    long hours = ChronoUnit.HOURS.between(startTime, endTime) + 1;
 
     int payments = 0;
 
@@ -190,7 +182,7 @@ public class Rate implements CSVEncodable, TablePrintable {
       }
     }
 
-    System.out.print("Ievadi laiku, kad tarifs saka darboties (piem. 5:34) vai nospied Enter: ");
+    System.out.print("Ievadi laiku, kad tarifs saka darboties (piem. 05:34) vai nospied Enter: ");
     LocalTime startTime = LocalTime.MIDNIGHT;
     try {
       String in = scanner.nextLine();
@@ -294,7 +286,7 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     // Pārbauda, vai rindā ir pietiekami daudz datu lauku, lai izveidotu objektu
     if (fields.length < 10) {
-      throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 10");
+      throw new Exception("Invalid csv fields: got " + fields.length + " expected 10");
     }
 
     // Konvertē teksta vērtības uz atbilstošajiem datu tipiem

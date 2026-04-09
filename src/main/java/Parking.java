@@ -62,8 +62,8 @@ public class Parking implements CSVEncodable, TablePrintable {
         String[] fields = csvdata.split(",");
 
         // Pārbauda, vai rindā ir pietiekami daudz datu lauku, lai izveidotu objektu
-        if (fields.length < 10) {
-            throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 10");
+        if (fields.length < 7) {
+            throw new Exception("Invalid csv fields: got " + fields.length + " expected 7");
         }
 
         // return id + "," + startTime + "," + endTime + "," + price + "," + email + ","
