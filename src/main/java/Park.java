@@ -56,7 +56,7 @@ public class Park implements CSVEncodable, TablePrintable {
     public static ArrayList<SearchResult> findBestParkings(Scanner scanner, HashMap<Integer, Park> parks,
             HashMap<Integer, ArrayList<Rate>> rates, AutoType autoType) throws Exception {
         System.out
-                .print("Ievadi laiku un datumu, kad plāno atstāt automašinu autostāvvietā (piem. 09:49 08.04.2026) vai nospied Enter: ");
+                .print("Ievadi laiku un datumu, kad plāno atstāt automašinu autostāvvietā (piem. 09:49 08.04.2026) un nospied Enter: ");
         LocalDateTime startTime = LocalDateTime.now();
         try {
             String in = scanner.nextLine();
@@ -64,7 +64,7 @@ public class Park implements CSVEncodable, TablePrintable {
                 startTime = LocalDateTime.parse(in, DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
             }
         } catch (Exception e) {
-            throw new Exception("Sakuma laiks nav pareizi ievadits!");
+            throw new Exception("Sākuma laiks nav pareizi ievadīts!");
         }
 
         if (startTime.isBefore(LocalDateTime.now()))
@@ -76,7 +76,7 @@ public class Park implements CSVEncodable, TablePrintable {
         try {
             endTime = LocalDateTime.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
         } catch (Exception e) {
-            throw new Exception("Beigu laiks nav pareizi ievadits!");
+            throw new Exception("Beigu laiks nav pareizi ievadīts!");
         }
 
         if (!endTime.isAfter(startTime))

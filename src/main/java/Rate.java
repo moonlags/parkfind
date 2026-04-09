@@ -213,14 +213,14 @@ public class Rate implements CSVEncodable, TablePrintable {
     try {
       multipleCount = Integer.valueOf(scanner.nextLine());
     } catch (Exception e) {
-      throw new Exception("Daudzumam ir jabut naturalajam skaitlim");
+      throw new Exception("Daudzumam ir jābut naturalajam skaitlim");
     }
 
     if (multipleCount <= 0) {
-      throw new Exception("Daudzumam ir jabut pozitivam!");
+      throw new Exception("Daudzumam ir jābut pozitivam!");
     }
 
-    System.out.print("Ievadi nedelas dienas, kad tarifs ir aktivs (piem. \'1,5,7\'), vai \'visas\': ");
+    System.out.print("Ievadi nedēļas dienas, kad tarifs ir aktīvs (piem. \'1,5,7\'), vai \'visas\': ");
     byte weekdays = 0;
     String wdStr = scanner.nextLine();
     if (wdStr.equals("visas")) {
@@ -232,10 +232,10 @@ public class Rate implements CSVEncodable, TablePrintable {
       try {
         day = Integer.valueOf(dayStr);
       } catch (Exception e) {
-        throw new Exception("Nedelas dienas nav ievaditas korekti!");
+        throw new Exception("Nedēļas dienas nav ievadītas korekti!");
       }
       if (day <= 0 || day > 7) {
-        throw new Exception("Diena " + day + " nav ievadita korekti!");
+        throw new Exception("Diena " + day + " nav ievadīta korekti!");
       }
       weekdays = (byte) (weekdays | 1 << (day - 1));
     }
