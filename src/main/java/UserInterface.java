@@ -81,7 +81,7 @@ public class UserInterface {
         // TODO: garumzimes
         throw new Exception("Taimera startesana apturēta!");
       default:
-        return options.get(choice - 1);
+        return options.get(choice - 2);
     }
   }
 
