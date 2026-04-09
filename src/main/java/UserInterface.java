@@ -90,32 +90,37 @@ public class UserInterface {
     });
 
     LocalDateTime startTime = LocalDateTime.now();
-    double price = 0;
 
     while (true) {
+      LocalDateTime timeNow = LocalDateTime.now();
+      double price = chosen.rate().calculatePrice(startTime, timeNow);
       try {
         f.get(1, TimeUnit.SECONDS); // wait up to 1s
         // enter recieved
         clearConsole();
+
         System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
-        System.out.println(HumanReadable.formatInterval(startTime, LocalDateTime.now()));
+        System.out.println(HumanReadable.formatInterval(startTime, timeNow));
         System.out.println("Un paterējāt " + price + " EUR");
-        // print out final price, start time, endtime, time spent
-        // save history
-        // exit
+
         break;
       } catch (Exception e) {
         clearConsole();
         System.out.println(
             "Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " "
-                + HumanReadable.formatInterval(startTime, LocalDateTime.now())
+                + HumanReadable.formatInterval(startTime, timeNow)
                 + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
-        // no enter recived
-        // print updated info to terminal
-        // current price and time parking
+
+        if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
+            || timeNow.toLocalTime().isBefore(chosen.rate().startTime())) {
+          Color.error("Izvēlētais tarifs tagad nestrādā!");
+          break;
+        }
+
         f.cancel(true);
       }
     }
+    // save history
     ex.shutdownNow();
   }
 

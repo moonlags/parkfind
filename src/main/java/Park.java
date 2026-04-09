@@ -99,7 +99,7 @@ public class Park implements CSVEncodable, TablePrintable {
             case 1:
                 throw new Exception("Autostāvvietas meklēšana apturēta!");
             default:
-                district = choices.get(choice - 2);
+                district = choices.get(choice - 1);
                 break;
         }
 

@@ -5,9 +5,4 @@
   <artifactId>apvai</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>apvai</name>
-  <dependency>
-    <groupId>org.ocpsoft.prettytime</groupId>
-    <artifactId>prettytime</artifactId>
-    <version>5.0.0.Final</version>
-</dependency>
 </project>

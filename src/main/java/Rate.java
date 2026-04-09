@@ -1,4 +1,6 @@
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +84,45 @@ public class Rate implements CSVEncodable, TablePrintable {
 
   public int amount() {
     return amount;
+  }
+
+  public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime) {
+    long months = ChronoUnit.MONTHS.between(startTime, endTime);
+    if (startTime.getDayOfMonth() != endTime.getDayOfMonth())
+      months++;
+
+    long days = ChronoUnit.DAYS.between(startTime, endTime);
+    if (startTime.getHour() != endTime.getHour())
+      days++;
+
+    long hours = ChronoUnit.HOURS.between(startTime, endTime);
+    if (startTime.getMinute() != endTime.getMinute())
+      hours++;
+
+    int payments = 0;
+
+    switch (rateType) {
+      case Hour:
+        double billableHours = Math.max(0.0, hours - freeHours);
+        if (billableHours <= 0)
+          break;
+
+        double rawHours = billableHours / amount; // rate.amount() is the billing unit (hours)
+        payments = (int) Math.ceil(rawHours); // round up to next whole payment unit
+        break;
+      case Day:
+        double rawDays = (double) days / amount; // rate.amount() is the billing unit (days)
+        payments = (int) Math.ceil(rawDays); // round up to next whole payment unit
+        break;
+      case Month:
+        double rawMonths = (double) months / amount; // rate.amount() is the billing unit
+                                                     // (months)
+        payments = (int) Math.ceil(rawMonths); // round up to next whole payment unit
+        break;
+    }
+
+    double fullPrice = price * payments;
+    return fullPrice;
   }
 
   // funkcija enterNew pieņem Scanner tipa vērtību scanner, int tipa vērtību id,
