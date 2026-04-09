@@ -1,5 +1,6 @@
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -189,12 +190,12 @@ public class Rate implements CSVEncodable, TablePrintable {
       }
     }
 
-    System.out.print("Ievadi laiku, kad tarifs saka darboties (piem. 05:34) vai nospied Enter: ");
+    System.out.print("Ievadi laiku, kad tarifs saka darboties (piem. 5:34) vai nospied Enter: ");
     LocalTime startTime = LocalTime.MIDNIGHT;
     try {
       String in = scanner.nextLine();
       if (!in.isEmpty()) {
-        startTime = LocalTime.parse(in);
+        startTime = LocalTime.parse(in, DateTimeFormatter.ofPattern("H:mm"));
       }
     } catch (Exception e) {
       throw new Exception("Sakuma laiks nav pareizi ievadits!");
@@ -205,7 +206,7 @@ public class Rate implements CSVEncodable, TablePrintable {
     try {
       String in = scanner.nextLine();
       if (!in.isEmpty()) {
-        endTime = LocalTime.parse(in);
+        endTime = LocalTime.parse(in, DateTimeFormatter.ofPattern("H:mm"));
       }
     } catch (Exception e) {
       throw new Exception("Beigu laiks nav pareizi ievadits!");

@@ -52,6 +52,9 @@ public class UserInterface {
   }
 
   private SearchResult chooseSearchResult(ArrayList<SearchResult> options) throws Exception {
+    if (options.isEmpty())
+      throw new Exception("Autostāvvietas nav atrastās!");
+
     List<String> columnNames = List.of("Adrese", "Tarifa tips", "Cena");
 
     int address_width = 6;
@@ -78,7 +81,7 @@ public class UserInterface {
         // TODO: garumzimes
         throw new Exception("Taimera startesana apturēta!");
       default:
-        return options.get(choice - 2);
+        return options.get(choice - 1);
     }
   }
 
