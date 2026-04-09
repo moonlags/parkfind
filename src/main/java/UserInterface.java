@@ -2,6 +2,7 @@
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,7 +20,6 @@ interface HandlerFn {
 public class UserInterface {
   private HandlerFn page;
   private User curr;
-  private AutoType chosenAutoType;
 
   private int chosenParkId;
 
@@ -58,7 +58,7 @@ public class UserInterface {
 
   private SearchResult chooseSearchResult(ArrayList<SearchResult> options) throws Exception {
     if (options.isEmpty())
-      throw new Exception("Autostāvvietas nav atrastās!");
+      throw new Exception("Tarifi nav atrasti!");
 
     List<String> columnNames = List.of("Adrese", "Tarifa tips", "Cena");
 
@@ -68,7 +68,7 @@ public class UserInterface {
         address_width = res.park().address().length();
     }
 
-    List<Integer> max_column_widths = List.of(address_width, 12, 7);
+    List<Integer> max_column_widths = List.of(address_width, 12, 9);
     Table.printTable(columnNames, max_column_widths, options);
 
     ArrayList<String> choices = new ArrayList<>();
@@ -84,7 +84,7 @@ public class UserInterface {
     switch (choice) {
       case 1:
         // TODO: garumzimes
-        throw new Exception("Taimera startesana apturēta!");
+        throw new Exception("Taimera startēšana apturēta!");
       default:
         return options.get(choice - 2);
     }
@@ -133,9 +133,14 @@ public class UserInterface {
             }
           }
 
-          System.out.println("Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " - "
+          long hours = ChronoUnit.HOURS.between(startTime, timeNow) + 1;
+          if (hours <= chosen.rate().freeHours()) {
+            System.out.println("Tagad tiek izmantotas " + chosen.rate().freeHours() + " bezmaksas stundas!");
+          }
+
+          System.out.println("Jūs jau stāvējāt autostāvvietā ar adresi " + chosen.park().address() + " - "
               + HumanReadable.formatInterval(startTime, timeNow)
-              + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
+              + " un esat samaksājāt " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
           // allow loop to resubmit new read task
         } catch (ExecutionException | InterruptedException e) {
           // treat as cancel/interrupt -> exit
@@ -173,7 +178,10 @@ public class UserInterface {
   // funkcija userPage atgriež HandlerFn tipa vērtību
   private HandlerFn userPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Atrast autostavvietu", "Samainit paroli", "Dzest kontu", "Atpakal", "Iziet"));
+        Arrays.asList("Atrast autostavvietu", "Apskatīt vēsturi", "Izdzēst visu vēsturi", "Izmainīt iestatījumus",
+            "Samainit paroli",
+            "Dzest kontu", "Atpakal",
+            "Iziet"));
 
     int choice = Menu.printMenu(scanner, choices);
 
@@ -183,7 +191,7 @@ public class UserInterface {
 
         ArrayList<SearchResult> results;
         try {
-          results = Park.findBestParkings(scanner, parks, rates, chosenAutoType);
+          results = Park.findBestParkings(scanner, parks, rates, curr.autoType());
         } catch (Exception e) {
           Color.error(e.getMessage());
           break;
@@ -201,6 +209,43 @@ public class UserInterface {
         break;
       case 2:
         clearConsole();
+        if (parkings.size() == 0) {
+          Color.error("Nav vēstures");
+          break;
+        }
+
+        List<String> columnNames = List.of("Adrese", "Sākuma laiks", "Beigu laiks", "Cena");
+
+        int address_width = 6;
+        for (Parking parking : parkings.get(curr.email())) {
+          if (parking.park().address().length() > address_width)
+            address_width = parking.park().address().length();
+        }
+
+        List<Integer> max_column_widths = List.of(address_width, 16, 16, 9);
+
+        Table.printTable(columnNames, max_column_widths, parkings.get(curr.email()));
+        break;
+      case 3:
+        clearConsole();
+        parkings.put(curr.email(), new ArrayList<>());
+        Color.success("Vēsture is izdzēstā!");
+
+        saveParkings();
+        break;
+      case 4:
+        clearConsole();
+        System.out.print("Vai jums ir elektromašīna? (Jā/Nē): ");
+        if (scanner.nextLine().equals("Jā")) {
+          curr.setAutoType(AutoType.Electro);
+        }
+        Color.success("Iestatījumi ir atjaunināti!");
+
+        saveUsers();
+
+        break;
+      case 5:
+        clearConsole();
         try {
           curr.changePassword(scanner, users);
           clearConsole();
@@ -212,7 +257,7 @@ public class UserInterface {
 
         saveUsers();
         break;
-      case 3:
+      case 6:
         clearConsole();
 
         System.out.print("Ievadiet paroli: ");
@@ -227,10 +272,10 @@ public class UserInterface {
 
         saveUsers();
         return this::loginPage;
-      case 4:
+      case 7:
         clearConsole();
         return this::loginPage;
-      case 5:
+      case 8:
         clearConsole();
         System.out.println("Visu labu!");
         System.exit(0);

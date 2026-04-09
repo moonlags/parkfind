@@ -24,8 +24,10 @@ public class User implements CSVEncodable, TablePrintable {
   private String phoneNumber;
   private AutoType autoType;
 
-  // funkcija User pieņem String tipa vērtību email, String tipa vērtību password, UserRole tipa vērtību role, 
-  // String tipa vērtību phoneNumber, AutoType tipa vērtību autoType un atgriež User tipa objektu
+  // funkcija User pieņem String tipa vērtību email, String tipa vērtību password,
+  // UserRole tipa vērtību role,
+  // String tipa vērtību phoneNumber, AutoType tipa vērtību autoType un atgriež
+  // User tipa objektu
   private User(String email, String password, UserRole role, String phoneNumber, AutoType autoType) {
     this.email = email;
     this.password = password;
@@ -37,6 +39,14 @@ public class User implements CSVEncodable, TablePrintable {
   // funkcija role atgriež UserRole tipa vērtību role
   public UserRole role() {
     return role;
+  }
+
+  public void setAutoType(AutoType autoType) {
+    this.autoType = autoType;
+  }
+
+  public AutoType autoType() {
+    return autoType;
   }
 
   // funkcija email atgriež String tipa vērtību email
@@ -110,7 +120,8 @@ public class User implements CSVEncodable, TablePrintable {
     return user;
   }
 
-  // funkcija readLineOrExit pieņem Scanner tipa vērtību scanner, String tipa vērtību prompt un atgriež String tipa vērtību line
+  // funkcija readLineOrExit pieņem Scanner tipa vērtību scanner, String tipa
+  // vērtību prompt un atgriež String tipa vērtību line
   private static String readLineOrExit(Scanner scanner, String prompt) throws Exception {
     System.out.print(prompt);
     String line = scanner.nextLine();
@@ -120,7 +131,8 @@ public class User implements CSVEncodable, TablePrintable {
     return line;
   }
 
-  // funkcija phoneNumberExists pieņem HashMap<String, User> tipa vērtību users, String tipa vērtību phoneNumber un atgriež boolean tipa vērtību exists
+  // funkcija phoneNumberExists pieņem HashMap<String, User> tipa vērtību users,
+  // String tipa vērtību phoneNumber un atgriež boolean tipa vērtību exists
   private static boolean phoneNumberExists(HashMap<String, User> users, String phoneNumber) {
     for (User elem : users.values()) {
       if (elem.phoneNumber != null && elem.phoneNumber.equals(phoneNumber))
@@ -129,7 +141,8 @@ public class User implements CSVEncodable, TablePrintable {
     return false;
   }
 
-  // funkcija changePassword pieņem Scanner tipa vērtību scanner, HashMap<String, User> tipa vērtību users
+  // funkcija changePassword pieņem Scanner tipa vērtību scanner, HashMap<String,
+  // User> tipa vērtību users
   public void changePassword(Scanner scanner, HashMap<String, User> users) throws Exception {
     System.out.print("Ievadi pašreizējo paroli: ");
     String curr_pwd = scanner.nextLine();
@@ -174,12 +187,14 @@ public class User implements CSVEncodable, TablePrintable {
     return email + "," + password + "," + role.name() + "," + phoneNumber + "," + autoType.name() + "\n";
   }
 
-  // funkcija checkPassword pieņem String tipa vērtību check un atgriež boolean tipa vērtību
+  // funkcija checkPassword pieņem String tipa vērtību check un atgriež boolean
+  // tipa vērtību
   public boolean checkPassword(String check) {
     return password.equals(check);
   }
 
-  // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež String tipa vērtību tableRow
+  // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež
+  // String tipa vērtību tableRow
   public String toTableRow(List<Integer> widths) {
     String formatString = widths.stream()
         .map(w -> "%-" + w + "s")
@@ -188,7 +203,8 @@ public class User implements CSVEncodable, TablePrintable {
     return String.format(formatString, email, role, phoneNumber, autoType);
   }
 
-  // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa vērtību
+  // funkcija fromCSV pieņem String tipa vērtību csvdata un atgriež User tipa
+  // vērtību
   public static User fromCSV(String csvdata) throws Exception {
     // email,password,role
     String[] fields = csvdata.split(",");

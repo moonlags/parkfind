@@ -87,6 +87,10 @@ public class Rate implements CSVEncodable, TablePrintable {
     return amount;
   }
 
+  public AutoType autoType() {
+    return autoType;
+  }
+
   public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime) {
     long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
     long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;

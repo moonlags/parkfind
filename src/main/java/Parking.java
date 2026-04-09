@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,10 @@ public class Parking implements CSVEncodable, TablePrintable {
         this.email = email;
         this.parkId = parkId;
         this.rateId = rateId;
+    }
+
+    public Park park() {
+        return park;
     }
 
     public void setPark(Park park) {
@@ -52,7 +57,9 @@ public class Parking implements CSVEncodable, TablePrintable {
                 .map(w -> "%-" + w + "s")
                 .collect(Collectors.joining(" | ", "| ", " |"));
 
-        return String.format(formatString, park.address(), startTime, endTime, price);
+        return String.format(formatString, park.address(),
+                startTime.format(DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")),
+                endTime.format(DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")), price);
     }
 
     // funkcija fromCSV pieņem String tipa vērtību csvData un atgriež Rate tipa
@@ -72,8 +79,8 @@ public class Parking implements CSVEncodable, TablePrintable {
 
         // Konvertē teksta vērtības uz atbilstošajiem datu tipiem
         int id = Integer.valueOf(fields[0]);
-        LocalDateTime startTime = LocalDateTime.parse(fields[1]);
-        LocalDateTime endTime = LocalDateTime.parse(fields[2]);
+        LocalDateTime startTime = LocalDateTime.parse(fields[1], DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy"));
+        LocalDateTime endTime = LocalDateTime.parse(fields[2], DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy"));
         double price = Double.valueOf(fields[3]);
         String email = fields[4];
         int parkId = Integer.valueOf(fields[5]);

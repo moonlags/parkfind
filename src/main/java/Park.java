@@ -121,6 +121,9 @@ public class Park implements CSVEncodable, TablePrintable {
             for (Rate rate : rates.get(park.id)) {
                 int payments = 0;
 
+                if (rate.autoType() != autoType)
+                    continue;
+
                 switch (rate.rateType()) {
                     case Hour:
                         double billableHours = Math.max(0.0, hours - rate.freeHours());
@@ -165,7 +168,7 @@ public class Park implements CSVEncodable, TablePrintable {
 
                     if (startTime.toLocalTime().isAfter(endTime.toLocalTime())
                             && !rate.startTime().isAfter(rate.endTime())) { // night rate
-                        break;
+                        continue;
                     }
                 }
 
