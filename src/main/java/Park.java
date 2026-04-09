@@ -62,13 +62,12 @@ public class Park implements CSVEncodable, TablePrintable {
             String in = scanner.nextLine();
             if (!in.isEmpty()) {
                 startTime = LocalDateTime.parse(in, DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
+                if (startTime.isBefore(LocalDateTime.now()))
+                    throw new Exception("Sākuma laiks nevar būt pagatnē!");
             }
         } catch (Exception e) {
             throw new Exception("Sakuma laiks nav pareizi ievadits!");
         }
-
-        if (startTime.isBefore(LocalDateTime.now()))
-            throw new Exception("Sākuma laiks nevar būt pagatnē!");
 
         System.out
                 .print("Ievadi paredzemo beigu laiku un datumu, kad izbraukt no autostāvvietas (piem. 10:03 09.04.2026): ");
