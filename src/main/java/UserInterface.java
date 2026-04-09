@@ -92,23 +92,31 @@ public class UserInterface {
     LocalDateTime startTime = LocalDateTime.now();
     double price = 0;
 
-    try {
-      f.get(1, TimeUnit.SECONDS); // wait up to 1s
-      // enter recieved close timer
-      // print out final price, start time, endtime, time spent
-      // save history
-      // exit
-    } catch (Exception e) {
-      clearConsole();
-      System.out.println(
-          "Jus jau stavejat autostavvieta ar adresi dasdasd 5s un esat samaksajat 5 eur!\nUzspiediet ENTER lai pabeigtu:");
-      // no enter recived
-      // print updated info to terminal
-      // current price and time parking
-      f.cancel(true);
-    } finally {
-      ex.shutdownNow();
+    while (true) {
+      try {
+        f.get(1, TimeUnit.SECONDS); // wait up to 1s
+        // enter recieved
+        clearConsole();
+        System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
+        System.out.println(HumanReadable.formatInterval(startTime, LocalDateTime.now()));
+        System.out.println("Un paterējāt " + price + " EUR");
+        // print out final price, start time, endtime, time spent
+        // save history
+        // exit
+        break;
+      } catch (Exception e) {
+        clearConsole();
+        System.out.println(
+            "Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " "
+                + HumanReadable.formatInterval(startTime, LocalDateTime.now())
+                + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
+        // no enter recived
+        // print updated info to terminal
+        // current price and time parking
+        f.cancel(true);
+      }
     }
+    ex.shutdownNow();
   }
 
   // funkcija userPage atgriež HandlerFn tipa vērtību

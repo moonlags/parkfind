@@ -2,6 +2,7 @@ import java.util.Scanner;
 import java.util.TreeSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,7 +61,7 @@ public class Park implements CSVEncodable, TablePrintable {
         try {
             String in = scanner.nextLine();
             if (!in.isEmpty()) {
-                startTime = LocalDateTime.parse(in);
+                startTime = LocalDateTime.parse(in, DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
             }
         } catch (Exception e) {
             throw new Exception("Sakuma laiks nav pareizi ievadits!");
@@ -73,7 +74,7 @@ public class Park implements CSVEncodable, TablePrintable {
                 .print("Ievadi paredzemo beigu laiku un datumu, kad izbraukt no autostāvvietas (piem. 10:03 09.04.2026): ");
         LocalDateTime endTime = LocalDateTime.now();
         try {
-            endTime = LocalDateTime.parse(scanner.nextLine());
+            endTime = LocalDateTime.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
         } catch (Exception e) {
             throw new Exception("Beigu laiks nav pareizi ievadits!");
         }
