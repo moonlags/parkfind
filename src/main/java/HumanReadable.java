@@ -4,11 +4,8 @@ import java.time.Period;
 
 public class HumanReadable {
     public static String formatInterval(LocalDateTime start, LocalDateTime end) {
-        if (end.isBefore(start)) {
-            LocalDateTime tmp = start;
-            start = end;
-            end = tmp;
-        }
+        if (end.isBefore(start))
+            throw new IllegalArgumentException("end must be after start");
 
         Period period = Period.between(start.toLocalDate(), end.toLocalDate());
         LocalDateTime mid = start.plus(period);

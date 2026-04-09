@@ -29,23 +29,24 @@ public class FileHandler<T extends CSVEncodable> {
     if (!f.exists())
       f.createNewFile();
 
-    Scanner scanner = new Scanner(f);
-    ArrayList<T> result = new ArrayList<T>();
+    try (Scanner scanner = new Scanner(f)) {
+      ArrayList<T> result = new ArrayList<T>();
 
-    // cikls nolasa katru faila rindu un mēģina to pārvērst par T tipa objektu
-    while (scanner.hasNextLine()) {
-      String line = scanner.nextLine();
+      // cikls nolasa katru faila rindu un mēģina to pārvērst par T tipa objektu
+      while (scanner.hasNextLine()) {
+        String line = scanner.nextLine();
 
-      try {
-        result.add(parser.invoke(line));
-        // kļūdu apstrāde gadījumā, ja parsēšana neizdodas
-      } catch (Exception e) {
-        Color.warn("Neizdevās ieladēt csv objektu: " + e.getMessage());
+        try {
+          result.add(parser.invoke(line));
+          // kļūdu apstrāde gadījumā, ja parsēšana neizdodas
+        } catch (Exception e) {
+          Color.warn("Neizdevās ieladēt csv objektu: " + e.getMessage());
+        }
       }
-    }
-    scanner.close();
 
-    return result;
+      scanner.close();
+      return result;
+    }
   }
 
   // funkcija appendOne pieņem T tipa vērtību data un atgriež:

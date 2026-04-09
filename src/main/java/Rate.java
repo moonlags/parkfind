@@ -107,7 +107,7 @@ public class Rate implements CSVEncodable, TablePrintable {
                                                      // (months)
         return (int) Math.ceil(rawMonths); // round up to next whole payment unit
     }
-    return 9999; // unreachable
+    throw new IllegalStateException("Unhandled RateType: " + rateType); // unreachable
   }
 
   public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime) {
@@ -273,7 +273,8 @@ public class Rate implements CSVEncodable, TablePrintable {
       temp = (byte) (temp >> 1);
       i++;
     }
-    wkd = wkd.substring(0, wkd.length() - 1);
+    if (!wkd.isEmpty())
+      wkd = wkd.substring(0, wkd.length() - 1);
 
     return String.format(formatString, id, autoType, rateType, price, wkd, startTime, endTime, amount,
         freeHours);

@@ -73,10 +73,6 @@ public class Parking implements CSVEncodable, TablePrintable {
             throw new Exception("Invalid csv fields: got " + fields.length + " expected 7");
         }
 
-        // return id + "," + startTime + "," + endTime + "," + price + "," + email + ","
-        // + parkId + ","
-        // + rateId + "\n";
-
         // Konvertē teksta vērtības uz atbilstošajiem datu tipiem
         int id = Integer.valueOf(fields[0]);
         LocalDateTime startTime = LocalDateTime.parse(fields[1]);

@@ -1,17 +1,21 @@
-// TODO: hash passwords
-
-import java.nio.charset.StandardCharsets;
+import java.util.TreeSet;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @FunctionalInterface
 interface HandlerFn {
@@ -198,7 +202,7 @@ public class UserInterface {
 
         ArrayList<SearchResult> results;
         try {
-          results = Park.findBestParkings(scanner, parks, rates, curr.autoType());
+          results = findBestParkings();
         } catch (Exception e) {
           Color.error(e.getMessage());
           break;
@@ -216,7 +220,7 @@ public class UserInterface {
         break;
       case 2:
         clearConsole();
-        if (parkings.get(curr.email()).size() == 0) {
+        if (!parkings.containsKey(curr.email())) {
           Color.error("Jums vēl nav vēstures!");
           break;
         }
@@ -235,6 +239,8 @@ public class UserInterface {
         System.out.print("Vai Jums ir elektromašīna? (Jā/Nē): ");
         if (scanner.nextLine().equals("Jā")) {
           curr.setAutoType(AutoType.Electro);
+        } else {
+          curr.setAutoType(AutoType.Any);
         }
         Color.success("Iestatījumi ir atjaunināti!");
 
@@ -379,7 +385,7 @@ public class UserInterface {
     switch (choice) {
       case 1:
         clearConsole();
-        if (parkings.get(chosenUserEmail).size() == 0) {
+        if (!parkings.containsKey(chosenUserEmail)) {
           Color.error("Lietotājam vēl nav vēstures");
           break;
         }
@@ -718,6 +724,115 @@ public class UserInterface {
     return this::loginPage;
   }
 
+  public ArrayList<SearchResult> findBestParkings() throws Exception {
+    System.out
+        .print(
+            "Ievadi laiku un datumu, kad plāno atstāt automašīnu autostāvvietā (piem. 09:49 08.04.2026)\nVai nospied Enter, lai ievadītu pašreizejo datumu: ");
+    LocalDateTime startTime = LocalDateTime.now();
+    try {
+      String in = scanner.nextLine();
+      if (!in.isEmpty()) {
+        startTime = LocalDateTime.parse(in, DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
+      }
+    } catch (Exception e) {
+      throw new Exception("Sākuma laiks nav pareizi ievadīts!");
+    }
+
+    if (startTime.isBefore(LocalDateTime.now().minusMinutes(1)))
+      throw new Exception("Sākuma laiks nevar būt pagātnē!");
+
+    System.out
+        .print("Ievadi paredzemo beigu laiku un datumu, kad izbrauksi no autostāvvietas (piem. 10:03 09.04.2026): ");
+    LocalDateTime endTime = LocalDateTime.now();
+    try {
+      endTime = LocalDateTime.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
+    } catch (Exception e) {
+      throw new Exception("Beigu laiks nav pareizi ievadīts!");
+    }
+
+    if (!endTime.isAfter(startTime))
+      throw new Exception("Beigu laiks nevar būt mazāks vai vienāds ar sākuma laiku!");
+
+    HashSet<String> districts = new HashSet<>();
+    for (Park park : parks.values()) {
+      districts.add(park.district());
+    }
+    ArrayList<String> choices = new ArrayList<>();
+    choices.add("Atpakaļ");
+    choices.addAll(districts);
+
+    System.out.println("Izvēlies rajonu!");
+    int choice = Menu.printMenu(scanner, choices);
+
+    String district;
+    switch (choice) {
+      case 1:
+        throw new Exception("Autostāvvietas meklēšana apturēta!");
+      default:
+        district = choices.get(choice - 1);
+        break;
+    }
+
+    ArrayList<Park> parksInSameDistrict = new ArrayList<>();
+    for (Park p : parks.values()) {
+      if (p.district().equals(district))
+        parksInSameDistrict.add(p);
+    }
+
+    long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+    long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+    long hours = Util.hoursBetweenDates(startTime, endTime);
+
+    TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
+    for (Park park : parksInSameDistrict) {
+      if (!rates.containsKey(park.id()))
+        continue;
+
+      for (Rate rate : rates.get(park.id())) {
+
+        if (rate.autoType() == AutoType.Electro && curr.autoType() != AutoType.Electro)
+          continue;
+
+        byte rateWeekdays = rate.weekDays(); // e.g., 00000101b means Monday+Wednesday
+        LocalDate cur = startTime.toLocalDate();
+        LocalDate end = endTime.toLocalDate();
+        // iterate each date covered by the booking; stop if any date not allowed
+        boolean allowedWeekdays = true;
+        while (!cur.isAfter(end)) {
+          if (!Util.isDateAllowedByWeekdays(cur, rateWeekdays)) {
+            allowedWeekdays = false;
+            break;
+          }
+          cur = cur.plusDays(1);
+        }
+
+        if (!allowedWeekdays)
+          continue;
+
+        if (!rate.startTime().equals(rate.endTime())) {
+          boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
+          boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
+          if (startOutside || endOutside)
+            continue;
+          else if (startTime.toLocalTime().isAfter(endTime.toLocalTime())
+              && !rate.startTime().isAfter(rate.endTime())) { // night rate
+            continue;
+          }
+        }
+
+        double price = rate.price() * rate.getPayments(hours, days, months);
+        results.add(new SearchResult(park, rate, price));
+      }
+    }
+
+    ArrayList<SearchResult> top5 = new ArrayList<>(5);
+    Iterator<SearchResult> it = results.iterator();
+    for (int i = 0; i < 5 && it.hasNext(); i++)
+      top5.add(it.next());
+
+    return top5;
+  }
+
   // funkcija loadUsers neko nepieņem un neko neatgriež
   private void loadUsers() {
     try {
@@ -786,9 +901,8 @@ public class UserInterface {
 
   private void saveParkings() {
     try {
-      for (ArrayList<Parking> parkingsForUser : parkings.values()) {
-        parkingFile.writeAll(parkingsForUser);
-      }
+      List<Parking> all = parkings.values().stream().flatMap(List::stream).collect(Collectors.toList());
+      parkingFile.writeAll(all);
     } catch (Exception e) {
       Color.warn("Neizdevās stavēšanas pievienot failā: " + e);
     }
@@ -815,9 +929,8 @@ public class UserInterface {
   // funkcija saveRates neko nepieņem un neko neatgriež
   private void saveRates() {
     try {
-      for (ArrayList<Rate> ratesForParks : rates.values()) {
-        rateFile.writeAll(ratesForParks);
-      }
+      List<Rate> all = rates.values().stream().flatMap(List::stream).collect(Collectors.toList());
+      rateFile.writeAll(all);
     } catch (Exception e) {
       Color.warn("Neizdevās tarifus pievienot failā: " + e);
     }

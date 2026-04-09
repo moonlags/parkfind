@@ -171,17 +171,18 @@ public class User implements CSVEncodable, TablePrintable {
     users.put(this.email, this);
   }
 
+  private static final Pattern EMAIL_RE = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+  private static final Pattern STRONG = Pattern.compile("^(?=.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
+
   // funkcija validatePassword pieņem String tipa vērtību pwd un atgriež boolean
   // tipa vērtību
   private static boolean validatePassword(String pwd) {
-    final Pattern STRONG = Pattern.compile("^(?=.{8,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
     return STRONG.matcher(pwd).matches();
   }
 
   // funkcija validateEmail pieņem String tipa vērtību email un atgriež boolean
   // tipa vērtību
   private static boolean validateEmail(String email) {
-    final Pattern EMAIL_RE = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
     return EMAIL_RE.matcher(email).matches();
   }
