@@ -166,6 +166,7 @@ public class UserInterface {
       Parking parking = new Parking(newId, startTime, finalEndTime,
           totalPrice, curr.email(), chosen.park().id(),
           chosen.rate().id());
+      parking.setPark(parks.get(parking.parkId()));
 
       temp.add(parking);
       newId++;
