@@ -143,7 +143,7 @@ public class Park implements CSVEncodable, TablePrintable {
                 if (!allowedWeekdays)
                     continue;
 
-                if (!rate.startTime().equals(rate.endTime()) && days > 1) {
+                if (!rate.startTime().equals(rate.endTime())) {
                     boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
                     boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
                     if (startOutside || endOutside)
