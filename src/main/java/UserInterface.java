@@ -61,7 +61,7 @@ public class UserInterface {
 
   private SearchResult chooseSearchResult(ArrayList<SearchResult> options) throws Exception {
     if (options.isEmpty())
-      throw new Exception("Tarifi nav atrasti!");
+      throw new Exception("Pieejamie tarifi nav atrasti!");
 
     List<String> columnNames = List.of("Adrese", "Tarifa tips", "Cena");
 
@@ -75,8 +75,7 @@ public class UserInterface {
     Table.printTable(columnNames, max_column_widths, options);
 
     ArrayList<String> choices = new ArrayList<>();
-    // TODO: garumzimes
-    choices.add("Atpakal");
+    choices.add("Atpakaļ");
     for (SearchResult res : options) {
       choices.add(res.park().address());
     }
@@ -86,8 +85,7 @@ public class UserInterface {
 
     switch (choice) {
       case 1:
-        // TODO: garumzimes
-        throw new Exception("Taimera startēšana apturēta!");
+        throw new Exception("Taimera startēšana tika apturēta!");
       default:
         return options.get(choice - 2);
     }
@@ -176,7 +174,7 @@ public class UserInterface {
       try {
         parkingFile.appendOne(parking);
       } catch (Exception e) {
-        Color.warn("Neizdevas pievienot vesturi failam: " + e);
+        Color.warn("Neizdevās pievienot vēsturi failam: " + e);
       }
     } finally {
       // ensure reader thread is stopped
@@ -189,8 +187,8 @@ public class UserInterface {
   // funkcija userPage atgriež HandlerFn tipa vērtību
   private HandlerFn userPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Atrast autostavvietu", "Apskatīt vēsturi", "Izdzēst visu vēsturi", "Izmainīt iestatījumus",
-            "Samainit paroli", "Dzest kontu", "Atpakal", "Iziet"));
+        Arrays.asList("Atrāst autostāvvietu", "Apskatīt vēsturi", "Izdzēst visu vēsturi", "Izmainīt iestatījumus",
+            "Nomainīt paroli", "Dzēst kontu", "Atpakaļ", "Iziet"));
 
     int choice = Menu.printMenu(scanner, choices);
 
@@ -219,7 +217,7 @@ public class UserInterface {
       case 2:
         clearConsole();
         if (parkings.get(curr.email()).size() == 0) {
-          Color.error("Jums vel nav vēstures");
+          Color.error("Jums vēl nav vēstures!");
           break;
         }
 
@@ -234,7 +232,7 @@ public class UserInterface {
         break;
       case 4:
         clearConsole();
-        System.out.print("Vai jums ir elektromašīna? (Jā/Nē): ");
+        System.out.print("Vai Jums ir elektromašīna? (Jā/Nē): ");
         if (scanner.nextLine().equals("Jā")) {
           curr.setAutoType(AutoType.Electro);
         }
@@ -248,7 +246,7 @@ public class UserInterface {
         try {
           curr.changePassword(scanner, users);
           clearConsole();
-          Color.success("Paroles maina ir veiksmiga!");
+          Color.success("Paroles maiņa ir veiksmīga!");
         } catch (Exception e) {
           Color.error(e.getMessage());
           break;
@@ -267,7 +265,7 @@ public class UserInterface {
         }
 
         users.remove(curr.email());
-        Color.success("Jusu konts ir dzests!");
+        Color.success("Jūsu konts ir dzests!");
 
         saveUsers();
         return this::loginPage;
@@ -286,7 +284,7 @@ public class UserInterface {
   // funkcija adminPage atgriež HandlerFn tipa vērtību
   private HandlerFn adminPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Apskatit lietotajus", "Apskatit autostavvietas", "Samainit paroli", "Atpakal", "Iziet"));
+        Arrays.asList("Apskatīt lietotājus", "Apskatīt autostāvvietas", "Nomainīt paroli", "Atpakaļ", "Iziet"));
     int choice = Menu.printMenu(scanner, choices);
 
     switch (choice) {
@@ -301,7 +299,7 @@ public class UserInterface {
         try {
           curr.changePassword(scanner, users);
           clearConsole();
-          Color.success("Paroles maina ir veiksmiga!");
+          Color.success("Paroles maiņa ir veiksmīga!");
         } catch (Exception e) {
           Color.error(e.getMessage());
           break;
@@ -324,7 +322,7 @@ public class UserInterface {
   // funkcija usersActionsPage atgriež HandlerFn tipa vērtību
   private HandlerFn usersActionsPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Izvadit lietotajus", "Apskatit lietotaju", "Atpakal", "Iziet"));
+        Arrays.asList("Izvadīt lietotājus", "Apskatīt lietotāju", "Atpakaļ", "Iziet"));
     int choice = Menu.printMenu(
         scanner, choices);
 
@@ -332,7 +330,7 @@ public class UserInterface {
       case 1:
         clearConsole();
         if (users.size() == 0) {
-          Color.error("Nav lietotaju!");
+          Color.error("Nav lietotāju!");
           break;
         }
 
@@ -341,16 +339,16 @@ public class UserInterface {
       case 2:
         clearConsole();
         if (users.size() == 0) {
-          Color.error("Nav lietotaju!");
+          Color.error("Nav lietotāju!");
           break;
         }
         printUsersTable();
 
-        System.out.print("Ievadiet lietotaja e-pastu: ");
+        System.out.print("Ievadiet lietotāja e-pastu: ");
         try {
           String email = scanner.nextLine();
           if (!users.containsKey(email)) {
-            Color.error("Lietotajs nav atrasts!");
+            Color.error("Lietotājs nav atrasts!");
             break;
           }
 
@@ -365,7 +363,7 @@ public class UserInterface {
         return this::adminPage;
       case 4:
         clearConsole();
-        System.out.println("Visu labu");
+        System.out.println("Visu labu!");
         System.exit(0);
     }
 
@@ -374,7 +372,7 @@ public class UserInterface {
 
   private HandlerFn singleUserActionsPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Izvadit vesturi", "Dzest lietotaju", "Atpakal", "Iziet"));
+        Arrays.asList("Izvadīt vēsturi", "Dzēst lietotāju", "Atpakaļ", "Iziet"));
     int choice = Menu.printMenu(
         scanner, choices);
 
@@ -382,7 +380,7 @@ public class UserInterface {
       case 1:
         clearConsole();
         if (parkings.get(chosenUserEmail).size() == 0) {
-          Color.error("Lietotajam vel nav vēstures");
+          Color.error("Lietotājam vēl nav vēstures");
           break;
         }
 
@@ -392,18 +390,18 @@ public class UserInterface {
         clearConsole();
 
         if (users.get(chosenUserEmail).role() == UserRole.Admin) {
-          Color.error("Jus nevarat izdzest administratoru!");
+          Color.error("Jūs nevarat izdzēst administratoru!");
           break;
         }
 
-        System.out.print("Vai tiešām dzest (Ja/Ne)?: ");
+        System.out.print("Vai tiešām dzēst (Jā/Nē)?: ");
         String y = scanner.nextLine();
 
-        if (!y.equals("Ja"))
+        if (!y.equals("Jā"))
           break;
 
         users.remove(chosenUserEmail);
-        Color.success("Lietotajs ir izdzests!");
+        Color.success("Lietotājs ir izdzēsts!");
 
         saveUsers();
         return this::usersActionsPage;
@@ -412,7 +410,7 @@ public class UserInterface {
         return this::usersActionsPage;
       case 4:
         clearConsole();
-        System.out.println("Visu labu");
+        System.out.println("Visu labu!");
         System.exit(0);
     }
 
@@ -422,7 +420,7 @@ public class UserInterface {
   // funkcija parksActionsPage atgriež HandlerFn tipa vērtību
   private HandlerFn parksActionsPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Pievienot autostavvietu", "Apskatit autostavvietu sarakstu", "Rediget autostavvietu", "Atpakal",
+        Arrays.asList("Pievienot autostāvvietu", "Apskatīt autostāvvietu sarakstu", "Rediģēt autostāvvietu", "Atpakaļ",
             "Iziet"));
     int choice = Menu.printMenu(
         scanner, choices);
@@ -463,7 +461,7 @@ public class UserInterface {
       case 3:
         clearConsole();
         if (parks.size() == 0) {
-          Color.error("Nav autostavvietu");
+          Color.error("Nav autostāvvietu");
           break;
         }
         printParksTable();
@@ -487,7 +485,7 @@ public class UserInterface {
         return this::adminPage;
       case 5:
         clearConsole();
-        System.out.println("Visu labu");
+        System.out.println("Visu labu!");
         System.exit(0);
     }
 
@@ -496,11 +494,9 @@ public class UserInterface {
 
   // funkcija singleParkActionsPage atgriež HandlerFn tipa vērtību
   private HandlerFn singleParkActionsPage() {
-    // TODO: hide parks from users as disabled
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Nomainit nosaukumu", "Nomainit adresi", "Nomainit rajonu", "Apskatit tarifus",
-            "Dzest autostāvvietu", "Atpakal",
-            "Iziet"));
+        Arrays.asList("Nomainīt nosaukumu", "Nomainīt adresi", "Nomainīt rajonu", "Apskatīt tarifus",
+            "Dzēst autostāvvietu", "Atpakaļ", "Iziet"));
     int choice = Menu.printMenu(
         scanner, choices);
 
@@ -514,7 +510,7 @@ public class UserInterface {
 
         temp.setName(newName);
         parks.put(temp.id(), temp);
-        Color.success("Nosaukums ir nomainits");
+        Color.success("Nosaukums ir nomainīts!");
 
         saveParks();
         break;
@@ -526,7 +522,7 @@ public class UserInterface {
 
         temp.setAddress(newAddress);
         parks.put(temp.id(), temp);
-        Color.success("Adrese ir izmainita");
+        Color.success("Adrese ir izmainīta!");
 
         saveParks();
         break;
@@ -538,7 +534,7 @@ public class UserInterface {
 
         temp.setDistrict(newDistrict);
         parks.put(temp.id(), temp);
-        Color.success("Rajons ir nomainits");
+        Color.success("Rajons ir nomainīts!");
 
         saveParks();
         break;
@@ -547,10 +543,10 @@ public class UserInterface {
         return this::rateActionsPage;
       case 5:
         clearConsole();
-        System.out.print("Vai tiešām dzest (Ja/Ne)?: ");
+        System.out.print("Vai tiešām dzēst (Jā/Nē)?: ");
         String y = scanner.nextLine();
 
-        if (!y.equals("Ja"))
+        if (!y.equals("Jā"))
           break;
 
         parks.remove(chosenParkId);
@@ -566,7 +562,7 @@ public class UserInterface {
         return this::parksActionsPage;
       case 7:
         clearConsole();
-        System.out.println("Visu labu");
+        System.out.println("Visu labu!");
         System.exit(0);
     }
 
@@ -589,7 +585,7 @@ public class UserInterface {
         try {
           rate = Rate.enterNew(scanner, newId, chosenParkId);
           clearConsole();
-          Color.success("Jauns tarifs ir veiksmigi izveidots!");
+          Color.success("Jauns tarifs ir veiksmīgi izveidots!");
         } catch (Exception e) {
           Color.error(e.getMessage());
           break;
@@ -612,7 +608,14 @@ public class UserInterface {
         break;
       case 2:
         clearConsole();
+        if (!rates.containsKey(chosenParkId)) {
+          Color.error("Nav tarifu");
+          break;
+        }
+        printRatesTable();
+
         try {
+          System.out.println("Ievadiet tarifa ID: ");
           int id = Integer.valueOf(scanner.nextLine());
 
           temp = rates.get(chosenParkId);
@@ -637,38 +640,24 @@ public class UserInterface {
 
           Color.success("Tarifs ir dzēsts");
         } catch (Exception e) {
-          Color.error("Ievadi pareizo tarifa ID!");
+          Color.error("Tarifa ID nav ievadīts pareizi!");
         }
         break;
       case 3:
         clearConsole();
-        if (rates.get(chosenParkId) == null || rates.get(chosenParkId).size() == 0) {
+        if (!rates.containsKey(chosenParkId)) {
           Color.error("Nav tarifu");
           break;
         }
 
-        List<String> columnNames = List.of("ID", "Auto tips", "Tarifa tips", "Pilna cena", "Nedēļas dienas",
-            "Sākuma laiks", "Beigu laiks", "Daudzums", "Bezmaksas stundas");
-
-        int id_width = 2;
-        int price_width = 10;
-        for (Rate p : rates.get(chosenParkId)) {
-          if (String.valueOf(p.id()).length() > id_width)
-            id_width = String.valueOf(p.id()).length();
-          if (String.valueOf(p.price()).length() > price_width)
-            price_width = String.valueOf(p.price()).length();
-        }
-
-        List<Integer> max_column_widths = List.of(id_width, 9, 14, price_width, 14, 12, 11, 8, 17);
-
-        Table.printTable(columnNames, max_column_widths, List.copyOf(rates.get(chosenParkId)));
+        printRatesTable();
         break;
       case 4:
         clearConsole();
         return this::singleParkActionsPage;
       case 5:
         clearConsole();
-        System.out.println("Visu labu");
+        System.out.println("Visu labu!");
         System.exit(0);
     }
 
@@ -698,7 +687,7 @@ public class UserInterface {
         try {
           userFile.appendOne(curr);
         } catch (Exception e) {
-          Color.warn("Neizdevas pievienot lietotaju failam: " + e);
+          Color.warn("Neizdevās pievienot lietotāju failam: " + e);
         }
 
         return this::userPage;
@@ -707,7 +696,7 @@ public class UserInterface {
         try {
           curr = User.login(scanner, users);
           clearConsole();
-          System.out.println("Jūs esat veiksmīgi atgriezusies sistema!");
+          System.out.println("Jūs esat veiksmīgi atgriezusies sistemā!");
 
           saveUsers();
 
@@ -737,7 +726,7 @@ public class UserInterface {
         users.put(user.email(), user);
       }
     } catch (Exception e) {
-      Color.warn("Neizdevas ieladet lietotajus: " + e);
+      Color.warn("Neizdevās ielādēt lietotājus: " + e);
     }
   }
 
@@ -751,7 +740,7 @@ public class UserInterface {
           newId = park.id() + 1;
       }
     } catch (Exception e) {
-      Color.warn("Neizdevas ieladet autostavvietu: " + e);
+      Color.warn("Neizdevās ielādēt autostāvvietas: " + e);
     }
   }
 
@@ -770,7 +759,7 @@ public class UserInterface {
         rates.put(rate.parkId(), temp);
       }
     } catch (Exception e) {
-      Color.warn("Neizdevas ieladet tarifu: " + e);
+      Color.warn("Neizdevās ielādēt tarifus: " + e);
     }
   }
 
@@ -801,7 +790,7 @@ public class UserInterface {
         parkingFile.writeAll(parkingsForUser);
       }
     } catch (Exception e) {
-      Color.warn("Neizdevās stavēšanas pievienot failos: " + e);
+      Color.warn("Neizdevās stavēšanas pievienot failā: " + e);
     }
   }
 
@@ -810,7 +799,7 @@ public class UserInterface {
     try {
       userFile.writeAll(users.values());
     } catch (Exception e) {
-      Color.warn("Neizdevās lietotājus pievienot failos: " + e);
+      Color.warn("Neizdevās lietotājus pievienot failā: " + e);
     }
   }
 
@@ -819,7 +808,7 @@ public class UserInterface {
     try {
       parkFile.writeAll(parks.values());
     } catch (Exception e) {
-      Color.warn("Neizdevās autostāvvietas pievienot failos: " + e);
+      Color.warn("Neizdevās autostāvvietas pievienot failā: " + e);
     }
   }
 
@@ -830,7 +819,7 @@ public class UserInterface {
         rateFile.writeAll(ratesForParks);
       }
     } catch (Exception e) {
-      Color.warn("Neizdevās tarifus pievienot failos: " + e);
+      Color.warn("Neizdevās tarifus pievienot failā: " + e);
     }
   }
 
@@ -861,7 +850,7 @@ public class UserInterface {
   }
 
   private void printUsersTable() {
-    List<String> columnNames = List.of("E-pasts", "Loma", "Talruna numurs", "Automasinas tips");
+    List<String> columnNames = List.of("E-pasts", "Loma", "Tālruņa numurs", "Automašīnas tips");
 
     int email_width = 7;
     for (String email : users.keySet()) {
@@ -886,6 +875,24 @@ public class UserInterface {
     List<Integer> max_column_widths = List.of(address_width, 16, 16, 9);
 
     Table.printTable(columnNames, max_column_widths, parkings.get(email));
+  }
+
+  private void printRatesTable() {
+    List<String> columnNames = List.of("ID", "Auto tips", "Tarifa tips", "Pilna cena", "Nedēļas dienas",
+        "Sākuma laiks", "Beigu laiks", "Daudzums", "Bezmaksas stundas");
+
+    int id_width = 2;
+    int price_width = 10;
+    for (Rate p : rates.get(chosenParkId)) {
+      if (String.valueOf(p.id()).length() > id_width)
+        id_width = String.valueOf(p.id()).length();
+      if (String.valueOf(p.price()).length() > price_width)
+        price_width = String.valueOf(p.price()).length();
+    }
+
+    List<Integer> max_column_widths = List.of(id_width, 9, 14, price_width, 14, 12, 11, 8, 17);
+
+    Table.printTable(columnNames, max_column_widths, List.copyOf(rates.get(chosenParkId)));
   }
 
   // funkcija clearConsole nepieņem parametrus un neatgriež nevienu vērtību

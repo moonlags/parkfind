@@ -31,25 +31,25 @@ public class Park implements CSVEncodable, TablePrintable {
     // funkcija enterNew pieņem Scanner tipa vērtību scanner un int tipa vērtību id
     // un atgriež Park tipa vērtību park
     public static Park enterNew(Scanner scanner, int id) throws Exception {
-        System.out.println("Ievadiet autostavvietas datus vai \'iziet\'!");
+        System.out.println("Ievadiet autostāvvietas datus vai \'iziet\'!");
         System.out.print("Ievadi nosaukumu: ");
         String name = scanner.nextLine();
         if (name.equals("iziet"))
-            throw new Exception("Autostavvietas izveide ir aptureta!");
+            throw new Exception("Autostāvvietas izveide ir apturēta!");
         else if (name.contains(","))
             throw new Exception("Neizmantojiet komatus!");
 
         System.out.print("Ievadi adresi: ");
         String address = scanner.nextLine();
         if (address.equals("iziet"))
-            throw new Exception("Autostavvietas izveide ir aptureta!");
+            throw new Exception("Autostāvvietas izveide ir apturēta!");
         else if (address.contains(","))
             throw new Exception("Neizmantojiet komatus!");
 
         System.out.print("Ievadi rajonu: ");
         String district = scanner.nextLine();
         if (district.equals("iziet"))
-            throw new Exception("Autostavvietas izveide ir aptureta!");
+            throw new Exception("Autostāvvietas izveide ir apturēta!");
         else if (district.contains(","))
             throw new Exception("Neizmantojiet komatus!");
 
@@ -58,11 +58,10 @@ public class Park implements CSVEncodable, TablePrintable {
         return park;
     }
 
-    // TODO: garumzimes check
     public static ArrayList<SearchResult> findBestParkings(Scanner scanner, HashMap<Integer, Park> parks,
             HashMap<Integer, ArrayList<Rate>> rates, AutoType autoType) throws Exception {
         System.out
-                .print("Ievadi laiku un datumu, kad plāno atstāt automašinu autostāvvietā (piem. 09:49 08.04.2026)\nVai nospied Enter, lai ievaditu pašreizejo datumu: ");
+                .print("Ievadi laiku un datumu, kad plāno atstāt automašīnu autostāvvietā (piem. 09:49 08.04.2026)\nVai nospied Enter, lai ievadītu pašreizejo datumu: ");
         LocalDateTime startTime = LocalDateTime.now();
         try {
             String in = scanner.nextLine();
@@ -74,10 +73,10 @@ public class Park implements CSVEncodable, TablePrintable {
         }
 
         if (startTime.isBefore(LocalDateTime.now().minusMinutes(1)))
-            throw new Exception("Sākuma laiks nevar būt pagatnē!");
+            throw new Exception("Sākuma laiks nevar būt pagātnē!");
 
         System.out
-                .print("Ievadi paredzemo beigu laiku un datumu, kad izbraukt no autostāvvietas (piem. 10:03 09.04.2026): ");
+                .print("Ievadi paredzemo beigu laiku un datumu, kad izbrauksi no autostāvvietas (piem. 10:03 09.04.2026): ");
         LocalDateTime endTime = LocalDateTime.now();
         try {
             endTime = LocalDateTime.parse(scanner.nextLine(), DateTimeFormatter.ofPattern("H:mm dd.MM.yyyy"));
@@ -93,8 +92,7 @@ public class Park implements CSVEncodable, TablePrintable {
             districts.add(park.district);
         }
         ArrayList<String> choices = new ArrayList<>();
-        // TODO: garumzimes
-        choices.add("Atpakal");
+        choices.add("Atpakaļ");
         choices.addAll(districts);
 
         System.out.println("Izvēlies rajonu!");
@@ -117,9 +115,7 @@ public class Park implements CSVEncodable, TablePrintable {
 
         long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
         long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
-        long hours = ChronoUnit.HOURS.between(startTime, endTime);
-        if (hours == 0)
-            hours++;
+        long hours = Util.hoursBetweenDates(startTime, endTime);
 
         TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
         for (Park park : parksInSameDistrict) {
@@ -127,30 +123,9 @@ public class Park implements CSVEncodable, TablePrintable {
                 continue;
 
             for (Rate rate : rates.get(park.id)) {
-                int payments = 0;
 
                 if (rate.autoType() == AutoType.Electro && autoType != AutoType.Electro)
                     continue;
-
-                switch (rate.rateType()) {
-                    case Hour:
-                        double billableHours = Math.max(0.0, hours - rate.freeHours());
-                        if (billableHours <= 0)
-                            break;
-
-                        double rawHours = billableHours / rate.amount(); // rate.amount() is the billing unit (hours)
-                        payments = (int) Math.ceil(rawHours); // round up to next whole payment unit
-                        break;
-                    case Day:
-                        double rawDays = (double) days / rate.amount(); // rate.amount() is the billing unit (days)
-                        payments = (int) Math.ceil(rawDays); // round up to next whole payment unit
-                        break;
-                    case Month:
-                        double rawMonths = (double) months / rate.amount(); // rate.amount() is the billing unit
-                                                                            // (months)
-                        payments = (int) Math.ceil(rawMonths); // round up to next whole payment unit
-                        break;
-                }
 
                 byte rateWeekdays = rate.weekDays(); // e.g., 00000101b means Monday+Wednesday
                 LocalDate cur = startTime.toLocalDate();
@@ -173,14 +148,13 @@ public class Park implements CSVEncodable, TablePrintable {
                     boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
                     if (startOutside || endOutside)
                         continue;
-
-                    if (startTime.toLocalTime().isAfter(endTime.toLocalTime())
+                    else if (startTime.toLocalTime().isAfter(endTime.toLocalTime())
                             && !rate.startTime().isAfter(rate.endTime())) { // night rate
                         continue;
                     }
                 }
 
-                double price = rate.price() * payments;
+                double price = rate.price() * rate.getPayments(hours, days, months);
                 results.add(new SearchResult(park, rate, price));
             }
         }
@@ -228,21 +202,9 @@ public class Park implements CSVEncodable, TablePrintable {
         this.district = district;
     }
 
-    // funkcija toString atgriež String tipa vērtību
-    public String toString() {
-        return name + "; " + address + "; " + district;
-    }
-
     // funkcija toCSV atgriež String tipa vērtību
     public String toCSV() {
         return id + "," + name + "," + address + "," + district + "\n";
-    }
-
-    // funkcija print neko nepieņem un neko neatgriež
-    public void print(int name_width, int address_width) {
-        System.out.printf("Nosaukums: %-" + name_width + "s; Adrese: %-" +
-                address_width + "s; Rajons: %-14s\n",
-                name, address, district);
     }
 
     public String toTableRow(List<Integer> widths) {
@@ -258,7 +220,7 @@ public class Park implements CSVEncodable, TablePrintable {
     public static Park fromCSV(String csvdata) throws Exception {
         String[] fields = csvdata.split(",");
         if (fields.length < 4) {
-            throw new Exception("Invalid csv fields: got " + fields.length + " expected 4");
+            throw new Exception("Nepareizs csv datu skaits: saņēma " + fields.length + ", gaidīja 4");
         }
         int id = Integer.valueOf(fields[0]);
         String name = fields[1];

@@ -105,7 +105,7 @@ public class User implements CSVEncodable, TablePrintable {
     String pwd = readLineOrExit(scanner, "Izdomā paroli (8 simboli, mazie burti, lielie burti): ");
     while (!validatePassword(pwd) || pwd.contains(",")) {
       if (pwd.contains(",")) {
-        Color.error("Neizmanotiet komatus!");
+        Color.error("Neizmanojiet komatus!");
       } else {
         Color.error("Parolei jābūt vismaz 8 simbolu garai, saturēt mazos burtus, lielos burtus un ciparus!");
       }
@@ -120,7 +120,7 @@ public class User implements CSVEncodable, TablePrintable {
 
     User user = new User(email, pwd, UserRole.User, phoneNumber, AutoType.Any);
     users.put(email, user);
-    Color.success("Reģistrācija veiksmīga.");
+    Color.success("Reģistrācija veiksmīga!");
     return user;
   }
 
@@ -130,7 +130,7 @@ public class User implements CSVEncodable, TablePrintable {
     System.out.print(prompt);
     String line = scanner.nextLine();
     if (line != null && line.trim().equalsIgnoreCase("iziet")) {
-      throw new Exception("Reģistrācija atcelta lietotāja pieprasījumā.");
+      throw new Exception("Reģistrācija atcelta lietotāja pieprasījumā!");
     }
     return line;
   }
@@ -154,7 +154,7 @@ public class User implements CSVEncodable, TablePrintable {
       throw new Exception("Nepareiza parole!");
     }
 
-    System.out.print("Izdomā jaunu paroli: ");
+    System.out.print("Izdomā jaunu paroli (8 simboli, mazie burti, lielie burti): ");
     String pwd = scanner.nextLine();
     if (!validatePassword(pwd)) {
       throw new Exception(
@@ -213,7 +213,7 @@ public class User implements CSVEncodable, TablePrintable {
     // email,password,role
     String[] fields = csvdata.split(",");
     if (fields.length < 2) {
-      throw new Exception("Invalid csv fields: got " + fields.length + " expected atleast 2");
+      throw new Exception("Nepareizs csv datu skaits: saņēma " + fields.length + ", gaidīja vismaz 2");
     }
     String email = fields[0];
     String name = fields[1];

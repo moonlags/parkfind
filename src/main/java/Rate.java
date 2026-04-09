@@ -39,11 +39,10 @@ public class Rate implements CSVEncodable, TablePrintable {
   private float freeHours;
 
   // funkcija Rate pieņem int tipa vērtību id, int tipa vērtību parkId, AutoType
-  // tipa vērtību autoType,
-  // RateType tipa vērtību rateType, float tipa vērtību price, LocalTime tipa
-  // vērtību startTime,
-  // LocalTime tipa vērtību endTime, int tipa vērtību mutipleCount, byte tipa
-  // vērtību weekDays, float tipa vērtību freeHours un neatgriež nekādu vērtību
+  // tipa vērtību autoType, RateType tipa vērtību rateType, float tipa vērtību
+  // price, LocalTime tipa vērtību startTime, LocalTime tipa vērtību endTime, int
+  // tipa vērtību mutipleCount, byte tipa vērtību weekDays, float tipa vērtību
+  // freeHours un neatgriež nekādu vērtību
   public Rate(int id, int parkId, AutoType autoType, RateType rateType, float price, LocalTime startTime,
       LocalTime endTime, int amount, byte weekDays, float freeHours) {
     this.id = id;
@@ -91,15 +90,7 @@ public class Rate implements CSVEncodable, TablePrintable {
     return autoType;
   }
 
-  public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime) {
-    long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
-    long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
-    long hours = ChronoUnit.HOURS.between(startTime, endTime);
-    if (hours == 0)
-      hours++;
-
-    int payments = 0;
-
+  public int getPayments(long hours, long days, long months) {
     switch (rateType) {
       case Hour:
         double billableHours = Math.max(0.0, hours - freeHours);
@@ -107,29 +98,32 @@ public class Rate implements CSVEncodable, TablePrintable {
           break;
 
         double rawHours = billableHours / amount; // rate.amount() is the billing unit (hours)
-        payments = (int) Math.ceil(rawHours); // round up to next whole payment unit
-        break;
+        return (int) Math.ceil(rawHours); // round up to next whole payment unit
       case Day:
         double rawDays = (double) days / amount; // rate.amount() is the billing unit (days)
-        payments = (int) Math.ceil(rawDays); // round up to next whole payment unit
-        break;
+        return (int) Math.ceil(rawDays); // round up to next whole payment unit
       case Month:
         double rawMonths = (double) months / amount; // rate.amount() is the billing unit
                                                      // (months)
-        payments = (int) Math.ceil(rawMonths); // round up to next whole payment unit
-        break;
+        return (int) Math.ceil(rawMonths); // round up to next whole payment unit
     }
+    return 9999; // unreachable
+  }
 
-    double fullPrice = price * payments;
-    return fullPrice;
+  public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime) {
+    long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+    long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
+    long hours = Util.hoursBetweenDates(startTime, endTime);
+
+    return price * getPayments(hours, days, months);
   }
 
   // funkcija enterNew pieņem Scanner tipa vērtību scanner, int tipa vērtību id,
   // int tipa vērtību parkId un atgriež Rate tipa vērtību rate
   public static Rate enterNew(Scanner scanner, int id, int parkId) throws Exception {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Izveleties jebkuru auto tipu",
-            "Izveleties elektro auto tipu", "Atpakal"));
+        Arrays.asList("Izvēlēties jebkuru auto tipu",
+            "Izvēlēties elektro auto tipu", "Atpakal"));
     int choice = Menu.printMenu(
         scanner, choices);
 
@@ -142,14 +136,13 @@ public class Rate implements CSVEncodable, TablePrintable {
         autoType = AutoType.Electro;
         break;
       default:
-        throw new Exception("Tarifa izveide ir aptureta!");
+        throw new Exception("Tarifa izveide ir apturēta!");
     }
 
     choices = new ArrayList<>(
         Arrays.asList("Izveidot stundas tipa tarifu", "Izveidot dienas posma tipa tarifu",
             "Izveidot mēneša tipa tarifu", "Atpakal"));
-    choice = Menu.printMenu(
-        scanner, choices);
+    choice = Menu.printMenu(scanner, choices);
 
     RateType rateType;
     switch (choice) {
@@ -163,7 +156,7 @@ public class Rate implements CSVEncodable, TablePrintable {
         rateType = RateType.Month;
         break;
       default:
-        throw new Exception("Tarifa izveide ir aptureta!");
+        throw new Exception("Tarifa izveide ir apturēta!");
     }
 
     System.out.print("Ievadi pilnu cenu: ");
@@ -171,11 +164,11 @@ public class Rate implements CSVEncodable, TablePrintable {
     try {
       price = Float.valueOf(scanner.nextLine());
     } catch (Exception e) {
-      throw new Exception("Cenai ir jabut realajam skaitlim!");
+      throw new Exception("Cenai ir jābut reālajam skaitlim!");
     }
 
     if (price < 0) {
-      throw new Exception("Cena nevar but negativa!");
+      throw new Exception("Cena nevar but negatīva!");
     }
 
     float freeHours = 0;
@@ -184,11 +177,12 @@ public class Rate implements CSVEncodable, TablePrintable {
       try {
         freeHours = Float.valueOf(scanner.nextLine());
       } catch (Exception e) {
-        throw new Exception("Bezmaksas stundas daudzums nav pareizi uzrakstits!");
+        throw new Exception("Bezmaksas stundas daudzums nav pareizi ievadīts!");
       }
     }
 
-    System.out.print("Ievadi laiku, kad tarifs saka darboties (piem. 05:34) vai nospied Enter: ");
+    System.out.print(
+        "Ievadi laiku, kad tarifs saka darboties (piem. 05:34)\nVai nospied Enter, lai izslēgtu sākuma laika ierobiežojumus: ");
     LocalTime startTime = LocalTime.MIDNIGHT;
     try {
       String in = scanner.nextLine();
@@ -199,7 +193,8 @@ public class Rate implements CSVEncodable, TablePrintable {
       throw new Exception("Sakuma laiks nav pareizi ievadits!");
     }
 
-    System.out.print("Ievadi laiku, kad tarifs beidz darboties (piem. 18:02) vai nospied Enter: ");
+    System.out.print(
+        "Ievadi laiku, kad tarifs beidz darboties (piem. 18:02)\nVai nospied Enter, lai izslēgtu beigu laika ierobiežojumus: ");
     LocalTime endTime = startTime;
     try {
       String in = scanner.nextLine();
@@ -207,7 +202,7 @@ public class Rate implements CSVEncodable, TablePrintable {
         endTime = LocalTime.parse(in, DateTimeFormatter.ofPattern("H:mm"));
       }
     } catch (Exception e) {
-      throw new Exception("Beigu laiks nav pareizi ievadits!");
+      throw new Exception("Beigu laiks nav pareizi ievadīts!");
     }
 
     System.out.print("Ievadi stundu/dienu/menēšu daudzumu: ");
@@ -215,11 +210,11 @@ public class Rate implements CSVEncodable, TablePrintable {
     try {
       multipleCount = Integer.valueOf(scanner.nextLine());
     } catch (Exception e) {
-      throw new Exception("Daudzumam ir jābut naturalajam skaitlim");
+      throw new Exception("Daudzumam ir jābut naturālajam skaitlim");
     }
 
     if (multipleCount <= 0) {
-      throw new Exception("Daudzumam ir jābut pozitivam!");
+      throw new Exception("Daudzumam ir jābut pozitīvam!");
     }
 
     System.out.print("Ievadi nedēļas dienas, kad tarifs ir aktīvs (piem. \'1,5,7\'), vai \'visas\': ");
@@ -292,7 +287,7 @@ public class Rate implements CSVEncodable, TablePrintable {
 
     // Pārbauda, vai rindā ir pietiekami daudz datu lauku, lai izveidotu objektu
     if (fields.length < 10) {
-      throw new Exception("Invalid csv fields: got " + fields.length + " expected 10");
+      throw new Exception("Nepareizs csv datu skaits: saņēma " + fields.length + ", gaidīja 10");
     }
 
     // Konvertē teksta vērtības uz atbilstošajiem datu tipiem

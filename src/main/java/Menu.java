@@ -3,8 +3,7 @@ import java.util.List;
 
 public class Menu {
   // funkcija printMenu pieņem Scanner tipa vērtību scanner, String[] tipa vērtību
-  // choices un
-  // atgriež int tipa vērtību choice
+  // choices un atgriež int tipa vērtību choice
   static int printMenu(Scanner scanner, List<String> choices) {
     System.out.println();
 

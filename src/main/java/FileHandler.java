@@ -40,7 +40,7 @@ public class FileHandler<T extends CSVEncodable> {
         result.add(parser.invoke(line));
         // kļūdu apstrāde gadījumā, ja parsēšana neizdodas
       } catch (Exception e) {
-        System.err.println("Error while loading from file: " + e.getMessage());
+        Color.warn("Neizdevās ieladēt csv objektu: " + e.getMessage());
       }
     }
     scanner.close();
