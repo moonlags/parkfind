@@ -105,7 +105,7 @@ public class Park implements CSVEncodable, TablePrintable {
 
         ArrayList<Park> parksInSameDistrict = new ArrayList<>();
         for (Park p : parks.values()) {
-            if (p.district == district)
+            if (p.district.equals(district))
                 parksInSameDistrict.add(p);
         }
 
@@ -151,7 +151,7 @@ public class Park implements CSVEncodable, TablePrintable {
                 LocalDate end = endTime.toLocalDate();
                 // iterate each date covered by the booking; stop if any date not allowed
                 while (!cur.isAfter(end)) {
-                    if (!isDateAllowedByWeekdays(cur, rateWeekdays)) {
+                    if (!Util.isDateAllowedByWeekdays(cur, rateWeekdays)) {
                         throw new Exception();
                     }
                     cur = cur.plusDays(1);
@@ -175,11 +175,6 @@ public class Park implements CSVEncodable, TablePrintable {
             top5.add(it.next());
 
         return top5;
-    }
-
-    private static boolean isDateAllowedByWeekdays(LocalDate date, byte weekdays) {
-        int dowIndex = date.getDayOfWeek().getValue();
-        return (weekdays & (1 << dowIndex)) != 0;
     }
 
     // funkcija atgriež int tipa vērtību id

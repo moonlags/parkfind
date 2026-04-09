@@ -112,7 +112,8 @@ public class UserInterface {
                 + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
 
         if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
-            || timeNow.toLocalTime().isBefore(chosen.rate().startTime())) {
+            || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
+            || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
           Color.error("Izvēlētais tarifs tagad nestrādā!");
           break;
         }
