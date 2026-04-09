@@ -29,6 +29,6 @@ public class SearchResult implements TablePrintable {
 				.map(w -> "%-" + w + "s")
 				.collect(Collectors.joining(" | ", "| ", " |"));
 
-		return String.format(formatString, park.address(), rate.rateType(), price);
+		return String.format(formatString, park.address(), rate.rateType(), String.format("%.2f", price));
 	}
 }

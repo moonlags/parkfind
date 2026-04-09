@@ -121,7 +121,7 @@ public class Park implements CSVEncodable, TablePrintable {
             for (Rate rate : rates.get(park.id)) {
                 int payments = 0;
 
-                if (rate.autoType() != autoType)
+                if (rate.autoType() == AutoType.Electro && autoType != AutoType.Electro)
                     continue;
 
                 switch (rate.rateType()) {

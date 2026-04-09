@@ -99,8 +99,8 @@ public class UserInterface {
       while (true) {
         // submit a task that blocks until ENTER is pressed
         Future<Void> f = ex.submit(() -> {
-          if (scanner.hasNextLine())
-            scanner.nextLine();
+          System.out.println(1);
+          scanner.nextLine();
           return null;
         });
 
@@ -116,7 +116,7 @@ public class UserInterface {
 
           System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
           System.out.println(HumanReadable.formatInterval(startTime, finalEndTime));
-          System.out.println("Un paterējāt " + chosen.rate().calculatePrice(startTime, finalEndTime) + " EUR");
+          System.out.println("Un paterējāt " + String.format("%.2f", price) + " EUR");
           break;
         } catch (TimeoutException te) {
           // no ENTER yet — keep showing status

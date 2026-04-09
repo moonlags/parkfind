@@ -59,7 +59,7 @@ public class Parking implements CSVEncodable, TablePrintable {
 
         return String.format(formatString, park.address(),
                 startTime.format(DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")),
-                endTime.format(DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")), price);
+                endTime.format(DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")), String.format("%.2f", price));
     }
 
     // funkcija fromCSV pieņem String tipa vērtību csvData un atgriež Rate tipa
@@ -79,8 +79,8 @@ public class Parking implements CSVEncodable, TablePrintable {
 
         // Konvertē teksta vērtības uz atbilstošajiem datu tipiem
         int id = Integer.valueOf(fields[0]);
-        LocalDateTime startTime = LocalDateTime.parse(fields[1], DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy"));
-        LocalDateTime endTime = LocalDateTime.parse(fields[2], DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy"));
+        LocalDateTime startTime = LocalDateTime.parse(fields[1]);
+        LocalDateTime endTime = LocalDateTime.parse(fields[2]);
         double price = Double.valueOf(fields[3]);
         String email = fields[4];
         int parkId = Integer.valueOf(fields[5]);
