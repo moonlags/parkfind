@@ -88,7 +88,8 @@ public class UserInterface {
   private void startTimer(Scanner scanner, SearchResult chosen) {
     ExecutorService ex = Executors.newSingleThreadExecutor();
     Future<Void> f = ex.submit(() -> {
-      scanner.nextLine();
+      if (scanner.hasNextLine())
+        scanner.nextLine();
       return null;
     });
 
@@ -109,17 +110,20 @@ public class UserInterface {
         break;
       } catch (Exception e) {
         clearConsole();
+
+        if (!chosen.rate().startTime().equals(chosen.rate().endTime())) {
+          if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
+              || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
+              || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
+            Color.error("Izvēlētais tarifs tagad nestrādā!");
+            break;
+          }
+        }
+
         System.out.println(
             "Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " "
                 + HumanReadable.formatInterval(startTime, timeNow)
                 + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
-
-        if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
-            || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
-            || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
-          Color.error("Izvēlētais tarifs tagad nestrādā!");
-          break;
-        }
 
         f.cancel(true);
       }
