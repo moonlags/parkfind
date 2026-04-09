@@ -8,8 +8,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @FunctionalInterface
 interface HandlerFn {
@@ -93,64 +95,68 @@ public class UserInterface {
   private void startTimer(Scanner scanner, SearchResult chosen) {
     ExecutorService ex = Executors.newSingleThreadExecutor();
     LocalDateTime startTime = LocalDateTime.now();
-    LocalDateTime finalEndTime = null;
+    AtomicBoolean stop = new AtomicBoolean(false);
+    final LocalDateTime[] finalEndTimeHolder = new LocalDateTime[1];
+
+    // Task that blocks waiting for ENTER
+    Future<?> reader = ex.submit(() -> {
+      try {
+        // Block until user presses ENTER or scanner is closed
+        scanner.nextLine();
+        stop.set(true);
+      } catch (NoSuchElementException | IllegalStateException e) {
+        // input closed; signal stop
+        stop.set(true);
+      }
+    });
 
     try {
-      while (true) {
-        // submit a task that blocks until ENTER is pressed
-        Future<Void> f = ex.submit(() -> {
-          System.out.println(1);
-          scanner.nextLine();
-          return null;
-        });
-
+      while (!stop.get()) {
         LocalDateTime timeNow = LocalDateTime.now();
         double price = chosen.rate().calculatePrice(startTime, timeNow);
 
+        clearConsole();
+
+        // check rate availability based on current time
+        if (!chosen.rate().startTime().equals(chosen.rate().endTime())) {
+          if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
+              || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
+              || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
+            Color.error("Izvēlētais tarifs tagad nestrādā!");
+            finalEndTimeHolder[0] = timeNow;
+            stop.set(true);
+            break;
+          }
+        }
+
+        long hours = ChronoUnit.HOURS.between(startTime, timeNow) + 1;
+        if (hours <= chosen.rate().freeHours()) {
+          System.out.println("Tagad tiek izmantotas " + chosen.rate().freeHours() + " bezmaksas stundas!");
+        }
+
+        System.out.println("Jūs jau stāvējāt autostāvvietā ar adresi " + chosen.park().address() + " - "
+            + HumanReadable.formatInterval(startTime, timeNow)
+            + " un esat samaksājāt " + String.format("%.2f", price) + " EUR!\nUzspiediet ENTER lai pabeigtu:");
+
+        // Sleep ~1 second between updates, but wake sooner if interrupted
         try {
-          // wait up to 1 second for ENTER
-          f.get(1, TimeUnit.SECONDS);
-          // ENTER received — record final end time and exit loop
-          finalEndTime = LocalDateTime.now();
-          clearConsole();
-
-          System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
-          System.out.println(HumanReadable.formatInterval(startTime, finalEndTime));
-          System.out.println("Un paterējāt " + String.format("%.2f", price) + " EUR");
-          break;
-        } catch (TimeoutException te) {
-          // no ENTER yet — keep showing status
-          clearConsole();
-
-          // check rate availability based on current time
-          if (!chosen.rate().startTime().equals(chosen.rate().endTime())) {
-            if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
-                || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
-                || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
-              Color.error("Izvēlētais tarifs tagad nestrādā!");
-              finalEndTime = timeNow;
-              break;
-            }
-          }
-
-          long hours = ChronoUnit.HOURS.between(startTime, timeNow) + 1;
-          if (hours <= chosen.rate().freeHours()) {
-            System.out.println("Tagad tiek izmantotas " + chosen.rate().freeHours() + " bezmaksas stundas!");
-          }
-
-          System.out.println("Jūs jau stāvējāt autostāvvietā ar adresi " + chosen.park().address() + " - "
-              + HumanReadable.formatInterval(startTime, timeNow)
-              + " un esat samaksājāt " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
-          // allow loop to resubmit new read task
-        } catch (ExecutionException | InterruptedException e) {
-          // treat as cancel/interrupt -> exit
-          finalEndTime = LocalDateTime.now();
-          break;
+          Thread.sleep(1000);
+        } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+          stop.set(true);
         }
       }
 
-      if (finalEndTime == null)
-        finalEndTime = LocalDateTime.now();
+      // record final end time
+      LocalDateTime finalEndTime = finalEndTimeHolder[0] != null ? finalEndTimeHolder[0] : LocalDateTime.now();
+
+      clearConsole();
+
+      double totalPrice = chosen.rate().calculatePrice(startTime, finalEndTime);
+
+      System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
+      System.out.println(HumanReadable.formatInterval(startTime, finalEndTime));
+      System.out.println("Un paterējāt " + String.format("%.2f", totalPrice) + " EUR");
 
       if (!parkings.containsKey(curr.email())) {
         parkings.put(curr.email(), new ArrayList<>());
@@ -158,7 +164,7 @@ public class UserInterface {
 
       ArrayList<Parking> temp = parkings.get(curr.email());
       Parking parking = new Parking(newId, startTime, finalEndTime,
-          chosen.rate().calculatePrice(startTime, finalEndTime), curr.email(), chosen.park().id(),
+          totalPrice, curr.email(), chosen.park().id(),
           chosen.rate().id());
 
       temp.add(parking);
@@ -171,6 +177,9 @@ public class UserInterface {
         Color.warn("Neizdevas pievienot vesturi failam: " + e);
       }
     } finally {
+      // ensure reader thread is stopped
+      stop.set(true);
+      reader.cancel(true);
       ex.shutdownNow();
     }
   }
@@ -444,6 +453,35 @@ public class UserInterface {
         break;
       case 3:
         clearConsole();
+        if (parks.size() == 0) {
+          Color.error("Nav autostavvietu");
+          break;
+        }
+
+        columnNames = List.of("ID", "Nosaukums", "Adrese", "Rajons");
+
+        id_width = 2;
+        name_width = 9;
+        address_width = 6;
+        district_width = 6;
+        for (Park p : parks.values()) {
+          if (String.valueOf(p.id()).length() > id_width)
+            id_width = String.valueOf(p.id()).length();
+          if (p.name().length() > name_width)
+            name_width = p.name().length();
+          if (p.address().length() > address_width)
+            address_width = p.address().length();
+          if (p.district().length() > district_width)
+            district_width = p.district().length();
+        }
+
+        temp = new ArrayList<>(parks.values());
+        temp.sort(Comparator.comparing(Park::id));
+
+        max_column_widths = List.of(id_width, name_width, address_width, district_width);
+
+        Table.printTable(columnNames, max_column_widths, temp);
+
         System.out.print("Ievadiet autostavvietas id: ");
         try {
           int id = Integer.valueOf(scanner.nextLine());
