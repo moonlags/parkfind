@@ -102,9 +102,13 @@ public class User implements CSVEncodable, TablePrintable {
       phoneNumber = readLineOrExit(scanner, "Ievadi tālruņa numuru (piem. +37121234567): ");
     }
 
-    String pwd = readLineOrExit(scanner, "Izdomā paroli: ");
-    while (!validatePassword(pwd)) {
-      Color.error("Parolei jābūt vismaz 8 simbolu garai, saturēt mazos burtus, lielos burtus un ciparus!");
+    String pwd = readLineOrExit(scanner, "Izdomā paroli (8 simboli, mazie burti, lielie burti): ");
+    while (!validatePassword(pwd) || pwd.contains(",")) {
+      if (pwd.contains(",")) {
+        Color.error("Neizmanotiet komatus!");
+      } else {
+        Color.error("Parolei jābūt vismaz 8 simbolu garai, saturēt mazos burtus, lielos burtus un ciparus!");
+      }
       pwd = readLineOrExit(scanner, "Izdomā paroli: ");
     }
 

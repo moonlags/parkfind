@@ -36,16 +36,22 @@ public class Park implements CSVEncodable, TablePrintable {
         String name = scanner.nextLine();
         if (name.equals("iziet"))
             throw new Exception("Autostavvietas izveide ir aptureta!");
+        else if (name.contains(","))
+            throw new Exception("Neizmantojiet komatus!");
 
         System.out.print("Ievadi adresi: ");
         String address = scanner.nextLine();
         if (address.equals("iziet"))
             throw new Exception("Autostavvietas izveide ir aptureta!");
+        else if (address.contains(","))
+            throw new Exception("Neizmantojiet komatus!");
 
         System.out.print("Ievadi rajonu: ");
         String district = scanner.nextLine();
         if (district.equals("iziet"))
             throw new Exception("Autostavvietas izveide ir aptureta!");
+        else if (district.contains(","))
+            throw new Exception("Neizmantojiet komatus!");
 
         Park park = new Park(id, name, address, district);
 
@@ -56,7 +62,7 @@ public class Park implements CSVEncodable, TablePrintable {
     public static ArrayList<SearchResult> findBestParkings(Scanner scanner, HashMap<Integer, Park> parks,
             HashMap<Integer, ArrayList<Rate>> rates, AutoType autoType) throws Exception {
         System.out
-                .print("Ievadi laiku un datumu, kad plāno atstāt automašinu autostāvvietā (piem. 09:49 08.04.2026) un nospied Enter: ");
+                .print("Ievadi laiku un datumu, kad plāno atstāt automašinu autostāvvietā (piem. 09:49 08.04.2026)\nVai nospied Enter, lai ievaditu pašreizejo datumu: ");
         LocalDateTime startTime = LocalDateTime.now();
         try {
             String in = scanner.nextLine();
@@ -67,7 +73,7 @@ public class Park implements CSVEncodable, TablePrintable {
             throw new Exception("Sākuma laiks nav pareizi ievadīts!");
         }
 
-        if (startTime.isBefore(LocalDateTime.now()))
+        if (startTime.isBefore(LocalDateTime.now().minusMinutes(1)))
             throw new Exception("Sākuma laiks nevar būt pagatnē!");
 
         System.out
@@ -111,7 +117,9 @@ public class Park implements CSVEncodable, TablePrintable {
 
         long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
         long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
-        long hours = ChronoUnit.HOURS.between(startTime, endTime) + 1;
+        long hours = ChronoUnit.HOURS.between(startTime, endTime);
+        if (hours == 0)
+            hours++;
 
         TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
         for (Park park : parksInSameDistrict) {

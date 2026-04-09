@@ -24,6 +24,7 @@ public class UserInterface {
   private User curr;
 
   private int chosenParkId;
+  private String chosenUserEmail;
 
   private int newId;
 
@@ -189,9 +190,7 @@ public class UserInterface {
   private HandlerFn userPage() {
     ArrayList<String> choices = new ArrayList<>(
         Arrays.asList("Atrast autostavvietu", "Apskatīt vēsturi", "Izdzēst visu vēsturi", "Izmainīt iestatījumus",
-            "Samainit paroli",
-            "Dzest kontu", "Atpakal",
-            "Iziet"));
+            "Samainit paroli", "Dzest kontu", "Atpakal", "Iziet"));
 
     int choice = Menu.printMenu(scanner, choices);
 
@@ -219,22 +218,12 @@ public class UserInterface {
         break;
       case 2:
         clearConsole();
-        if (parkings.size() == 0) {
-          Color.error("Nav vēstures");
+        if (parkings.get(curr.email()).size() == 0) {
+          Color.error("Jums vel nav vēstures");
           break;
         }
 
-        List<String> columnNames = List.of("Adrese", "Sākuma laiks", "Beigu laiks", "Cena");
-
-        int address_width = 6;
-        for (Parking parking : parkings.get(curr.email())) {
-          if (parking.park().address().length() > address_width)
-            address_width = parking.park().address().length();
-        }
-
-        List<Integer> max_column_widths = List.of(address_width, 16, 16, 9);
-
-        Table.printTable(columnNames, max_column_widths, parkings.get(curr.email()));
+        printParkingsTable(curr.email());
         break;
       case 3:
         clearConsole();
@@ -335,7 +324,7 @@ public class UserInterface {
   // funkcija usersActionsPage atgriež HandlerFn tipa vērtību
   private HandlerFn usersActionsPage() {
     ArrayList<String> choices = new ArrayList<>(
-        Arrays.asList("Izvadit lietotajus", "Dzest lietotajus", "Atpakal", "Iziet"));
+        Arrays.asList("Izvadit lietotajus", "Apskatit lietotaju", "Atpakal", "Iziet"));
     int choice = Menu.printMenu(
         scanner, choices);
 
@@ -343,40 +332,34 @@ public class UserInterface {
       case 1:
         clearConsole();
         if (users.size() == 0) {
-          Color.error("Nav lietotaju");
+          Color.error("Nav lietotaju!");
           break;
         }
 
-        List<String> columnNames = List.of("E-pasts", "Loma", "Talruna numurs", "Automasinas tips");
-
-        int email_width = 7;
-        for (String email : users.keySet()) {
-          if (email.length() > email_width)
-            email_width = email.length();
-        }
-
-        List<Integer> max_column_widths = List.of(email_width, 14, 14, 16);
-
-        Table.printTable(columnNames, max_column_widths, List.copyOf(users.values()));
+        printUsersTable();
         break;
       case 2:
         clearConsole();
-        System.out.print("Ievadiet lietotaja e-pastu: ");
-
-        String email = scanner.nextLine();
-        if (!users.containsKey(email)) {
-          Color.error("E-pasts nav atrasts!");
-          break;
-        } else if (curr.email().equals(email)) {
-          Color.error("Jus nevarat izdzest sevi!");
+        if (users.size() == 0) {
+          Color.error("Nav lietotaju!");
           break;
         }
+        printUsersTable();
 
-        users.remove(email);
-        Color.success("Lietotajs ir izdzests!");
+        System.out.print("Ievadiet lietotaja e-pastu: ");
+        try {
+          String email = scanner.nextLine();
+          if (!users.containsKey(email)) {
+            Color.error("Lietotajs nav atrasts!");
+            break;
+          }
 
-        saveUsers();
-        break;
+          chosenUserEmail = email;
+          return this::singleUserActionsPage;
+        } catch (Exception e) {
+          Color.error("Autostāvvietas id nav ievadīts pareizi!");
+          break;
+        }
       case 3:
         clearConsole();
         return this::adminPage;
@@ -387,6 +370,53 @@ public class UserInterface {
     }
 
     return this::usersActionsPage;
+  }
+
+  private HandlerFn singleUserActionsPage() {
+    ArrayList<String> choices = new ArrayList<>(
+        Arrays.asList("Izvadit vesturi", "Dzest lietotaju", "Atpakal", "Iziet"));
+    int choice = Menu.printMenu(
+        scanner, choices);
+
+    switch (choice) {
+      case 1:
+        clearConsole();
+        if (parkings.get(chosenUserEmail).size() == 0) {
+          Color.error("Lietotajam vel nav vēstures");
+          break;
+        }
+
+        printParkingsTable(chosenUserEmail);
+        break;
+      case 2:
+        clearConsole();
+
+        if (users.get(chosenUserEmail).role() == UserRole.Admin) {
+          Color.error("Jus nevarat izdzest administratoru!");
+          break;
+        }
+
+        System.out.print("Vai tiešām dzest (Ja/Ne)?: ");
+        String y = scanner.nextLine();
+
+        if (!y.equals("Ja"))
+          break;
+
+        users.remove(chosenUserEmail);
+        Color.success("Lietotajs ir izdzests!");
+
+        saveUsers();
+        return this::usersActionsPage;
+      case 3:
+        clearConsole();
+        return this::usersActionsPage;
+      case 4:
+        clearConsole();
+        System.out.println("Visu labu");
+        System.exit(0);
+    }
+
+    return this::singleUserActionsPage;
   }
 
   // funkcija parksActionsPage atgriež HandlerFn tipa vērtību
@@ -428,29 +458,7 @@ public class UserInterface {
           break;
         }
 
-        List<String> columnNames = List.of("ID", "Nosaukums", "Adrese", "Rajons");
-
-        int id_width = 2;
-        int name_width = 9;
-        int address_width = 6;
-        int district_width = 6;
-        for (Park p : parks.values()) {
-          if (String.valueOf(p.id()).length() > id_width)
-            id_width = String.valueOf(p.id()).length();
-          if (p.name().length() > name_width)
-            name_width = p.name().length();
-          if (p.address().length() > address_width)
-            address_width = p.address().length();
-          if (p.district().length() > district_width)
-            district_width = p.district().length();
-        }
-
-        ArrayList<Park> temp = new ArrayList<>(parks.values());
-        temp.sort(Comparator.comparing(Park::id));
-
-        List<Integer> max_column_widths = List.of(id_width, name_width, address_width, district_width);
-
-        Table.printTable(columnNames, max_column_widths, temp);
+        printParksTable();
         break;
       case 3:
         clearConsole();
@@ -458,30 +466,7 @@ public class UserInterface {
           Color.error("Nav autostavvietu");
           break;
         }
-
-        columnNames = List.of("ID", "Nosaukums", "Adrese", "Rajons");
-
-        id_width = 2;
-        name_width = 9;
-        address_width = 6;
-        district_width = 6;
-        for (Park p : parks.values()) {
-          if (String.valueOf(p.id()).length() > id_width)
-            id_width = String.valueOf(p.id()).length();
-          if (p.name().length() > name_width)
-            name_width = p.name().length();
-          if (p.address().length() > address_width)
-            address_width = p.address().length();
-          if (p.district().length() > district_width)
-            district_width = p.district().length();
-        }
-
-        temp = new ArrayList<>(parks.values());
-        temp.sort(Comparator.comparing(Park::id));
-
-        max_column_widths = List.of(id_width, name_width, address_width, district_width);
-
-        Table.printTable(columnNames, max_column_widths, temp);
+        printParksTable();
 
         System.out.print("Ievadiet autostāvvietas id: ");
         try {
@@ -847,6 +832,60 @@ public class UserInterface {
     } catch (Exception e) {
       Color.warn("Neizdevās tarifus pievienot failos: " + e);
     }
+  }
+
+  private void printParksTable() {
+    List<String> columnNames = List.of("ID", "Nosaukums", "Adrese", "Rajons");
+
+    int id_width = 2;
+    int name_width = 9;
+    int address_width = 6;
+    int district_width = 6;
+    for (Park p : parks.values()) {
+      if (String.valueOf(p.id()).length() > id_width)
+        id_width = String.valueOf(p.id()).length();
+      if (p.name().length() > name_width)
+        name_width = p.name().length();
+      if (p.address().length() > address_width)
+        address_width = p.address().length();
+      if (p.district().length() > district_width)
+        district_width = p.district().length();
+    }
+
+    ArrayList<Park> temp = new ArrayList<>(parks.values());
+    temp.sort(Comparator.comparing(Park::id));
+
+    List<Integer> max_column_widths = List.of(id_width, name_width, address_width, district_width);
+
+    Table.printTable(columnNames, max_column_widths, temp);
+  }
+
+  private void printUsersTable() {
+    List<String> columnNames = List.of("E-pasts", "Loma", "Talruna numurs", "Automasinas tips");
+
+    int email_width = 7;
+    for (String email : users.keySet()) {
+      if (email.length() > email_width)
+        email_width = email.length();
+    }
+
+    List<Integer> max_column_widths = List.of(email_width, 14, 14, 16);
+
+    Table.printTable(columnNames, max_column_widths, List.copyOf(users.values()));
+  }
+
+  private void printParkingsTable(String email) {
+    List<String> columnNames = List.of("Adrese", "Sākuma laiks", "Beigu laiks", "Cena");
+
+    int address_width = 6;
+    for (Parking parking : parkings.get(email)) {
+      if (parking.park().address().length() > address_width)
+        address_width = parking.park().address().length();
+    }
+
+    List<Integer> max_column_widths = List.of(address_width, 16, 16, 9);
+
+    Table.printTable(columnNames, max_column_widths, parkings.get(email));
   }
 
   // funkcija clearConsole nepieņem parametrus un neatgriež nevienu vērtību
