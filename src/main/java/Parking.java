@@ -23,6 +23,22 @@ public class Parking implements CSVEncodable, TablePrintable {
         this.rateId = rateId;
     }
 
+    public void setPark(Park park) {
+        this.park = park;
+    }
+
+    public int id() {
+        return id;
+    }
+
+    public int parkId() {
+        return parkId;
+    }
+
+    public String email() {
+        return email;
+    }
+
     // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību toCSV
     public String toCSV() {
         return id + "," + startTime + "," + endTime + "," + price + "," + email + "," + parkId + ","

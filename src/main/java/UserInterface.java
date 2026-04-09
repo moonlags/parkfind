@@ -36,16 +36,21 @@ public class UserInterface {
   private HashMap<Integer, ArrayList<Rate>> rates;
   private FileHandler<Rate> rateFile;
 
+  private HashMap<String, ArrayList<Parking>> parkings;
+  private FileHandler<Parking> parkingFile;
+
   public UserInterface() {
     users = new HashMap<>();
     parks = new HashMap<>();
     rates = new HashMap<>();
+    parkings = new HashMap<>();
 
     scanner = new Scanner(System.in, StandardCharsets.UTF_8);
 
     userFile = new FileHandler<>("data/users.csv", User::fromCSV);
     parkFile = new FileHandler<>("data/parks.csv", Park::fromCSV);
     rateFile = new FileHandler<>("data/rates.csv", Rate::fromCSV);
+    parkingFile = new FileHandler<>("data/parkings.csv", Parking::fromCSV);
 
     page = this::loginPage;
     newId = 1;
@@ -87,49 +92,78 @@ public class UserInterface {
 
   private void startTimer(Scanner scanner, SearchResult chosen) {
     ExecutorService ex = Executors.newSingleThreadExecutor();
-    Future<Void> f = ex.submit(() -> {
-      if (scanner.hasNextLine())
-        scanner.nextLine();
-      return null;
-    });
-
     LocalDateTime startTime = LocalDateTime.now();
+    LocalDateTime finalEndTime = null;
 
-    while (true) {
-      LocalDateTime timeNow = LocalDateTime.now();
-      double price = chosen.rate().calculatePrice(startTime, timeNow);
-      try {
-        f.get(1, TimeUnit.SECONDS); // wait up to 1s
-        // enter recieved
-        clearConsole();
+    try {
+      while (true) {
+        // submit a task that blocks until ENTER is pressed
+        Future<Void> f = ex.submit(() -> {
+          if (scanner.hasNextLine())
+            scanner.nextLine();
+          return null;
+        });
 
-        System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
-        System.out.println(HumanReadable.formatInterval(startTime, timeNow));
-        System.out.println("Un paterējāt " + price + " EUR");
+        LocalDateTime timeNow = LocalDateTime.now();
+        double price = chosen.rate().calculatePrice(startTime, timeNow);
 
-        break;
-      } catch (Exception e) {
-        clearConsole();
+        try {
+          // wait up to 1 second for ENTER
+          f.get(1, TimeUnit.SECONDS);
+          // ENTER received — record final end time and exit loop
+          finalEndTime = LocalDateTime.now();
+          clearConsole();
 
-        if (!chosen.rate().startTime().equals(chosen.rate().endTime())) {
-          if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
-              || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
-              || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
-            Color.error("Izvēlētais tarifs tagad nestrādā!");
-            break;
+          System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
+          System.out.println(HumanReadable.formatInterval(startTime, finalEndTime));
+          System.out.println("Un paterējāt " + chosen.rate().calculatePrice(startTime, finalEndTime) + " EUR");
+          break;
+        } catch (TimeoutException te) {
+          // no ENTER yet — keep showing status
+          clearConsole();
+
+          // check rate availability based on current time
+          if (!chosen.rate().startTime().equals(chosen.rate().endTime())) {
+            if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
+                || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
+                || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
+              Color.error("Izvēlētais tarifs tagad nestrādā!");
+              finalEndTime = timeNow;
+              break;
+            }
           }
+
+          System.out.println("Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " "
+              + HumanReadable.formatInterval(startTime, timeNow)
+              + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
+          // allow loop to resubmit new read task
+        } catch (ExecutionException | InterruptedException e) {
+          // treat as cancel/interrupt -> exit
+          finalEndTime = LocalDateTime.now();
+          break;
         }
-
-        System.out.println(
-            "Jus jau stavejat autostavvieta ar adresi " + chosen.park().address() + " "
-                + HumanReadable.formatInterval(startTime, timeNow)
-                + " un esat samaksajat " + price + " EUR!\nUzspiediet ENTER lai pabeigtu:");
-
-        f.cancel(true);
       }
+
+      if (finalEndTime == null)
+        finalEndTime = LocalDateTime.now();
+
+      ArrayList<Parking> temp = parkings.get(curr.email());
+      Parking parking = new Parking(newId, startTime, finalEndTime,
+          chosen.rate().calculatePrice(startTime, finalEndTime), curr.email(), chosen.park().id(),
+          chosen.rate().id());
+
+      temp.add(parking);
+      newId++;
+      parkings.put(curr.email(), temp);
+
+      try {
+        parkingFile.appendOne(parking);
+      } catch (Exception e) {
+        Color.warn("Neizdevas pievienot vesturi failam: " + e);
+      }
+    } finally {
+      ex.shutdownNow();
     }
-    // save history
-    ex.shutdownNow();
   }
 
   // funkcija userPage atgriež HandlerFn tipa vērtību
@@ -667,6 +701,37 @@ public class UserInterface {
     }
   }
 
+  private void loadParkings() {
+    try {
+      ArrayList<Parking> parkingArray = parkingFile.loadAll();
+      for (Parking parking : parkingArray) {
+        if (!parkings.containsKey(parking.email())) {
+          parkings.put(parking.email(), new ArrayList<>());
+        }
+
+        if (parking.id() >= newId)
+          newId = parking.id() + 1;
+        ArrayList<Parking> temp = parkings.get(parking.email());
+
+        parking.setPark(parks.get(parking.parkId()));
+        temp.add(parking);
+        parkings.put(parking.email(), temp);
+      }
+    } catch (Exception e) {
+      Color.warn("Neizdevas ieladet stavēšanas: " + e);
+    }
+  }
+
+  private void saveParkings() {
+    try {
+      for (ArrayList<Parking> parkingsForUser : parkings.values()) {
+        parkingFile.writeAll(parkingsForUser);
+      }
+    } catch (Exception e) {
+      Color.warn("Neizdevas stavēšanas pievienot failos: " + e);
+    }
+  }
+
   // funkcija saveUsers neko nepieņem un neko neatgriež
   private void saveUsers() {
     try {
@@ -710,6 +775,7 @@ public class UserInterface {
     loadUsers();
     loadParks();
     loadRates();
+    loadParkings();
 
     while (true) {
       page = page.invoke();

@@ -23,18 +23,18 @@ public class HumanReadable {
         long seconds = duration.minusHours(hours).minusMinutes(minutes).getSeconds();
 
         StringBuilder sb = new StringBuilder();
-        append(sb, years, "year");
-        append(sb, months, "month");
-        append(sb, days, "day");
-        append(sb, hours, "hour");
-        append(sb, minutes, "minute");
-        append(sb, seconds, "second");
+        append(sb, years, "gadus");
+        append(sb, months, "menēšus");
+        append(sb, days, "dienas");
+        append(sb, hours, "stundas");
+        append(sb, minutes, "minutes");
+        append(sb, seconds, "sekundes");
 
-        String result = sb.length() == 0 ? "0 seconds" : sb.toString().trim();
+        String result = sb.length() == 0 ? "0 sekundes" : sb.toString().trim();
         // make nicer: replace last comma with " and"
         int lastComma = result.lastIndexOf(',');
         if (lastComma != -1)
-            result = result.substring(0, lastComma) + " and" + result.substring(lastComma + 1);
+            result = result.substring(0, lastComma) + " un" + result.substring(lastComma + 1);
         return result;
     }
 
