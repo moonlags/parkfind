@@ -702,7 +702,7 @@ public class UserInterface {
         try {
           curr = User.login(scanner, users);
           clearConsole();
-          System.out.println("Jūs esat veiksmīgi atgriezusies sistemā!");
+          System.out.println("Jūs esat veiksmīgi atgriezusies sistēmā!");
 
           saveUsers();
 
