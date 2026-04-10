@@ -67,6 +67,8 @@ public class UserInterface {
     if (options.isEmpty())
       throw new Exception("Pieejamie tarifi nav atrasti!");
 
+    System.out.println("Pieejamās stāvvietas rajonā: " + options.get(1).park().district());
+
     List<String> columnNames = List.of("Adrese", "Tarifa tips", "Cena");
 
     int address_width = 6;
@@ -77,6 +79,7 @@ public class UserInterface {
 
     List<Integer> max_column_widths = List.of(address_width, 12, 9);
     Table.printTable(columnNames, max_column_widths, options);
+    System.out.println("Tika atrāsti " + options.size() + " varianti!");
 
     ArrayList<String> choices = new ArrayList<>();
     choices.add("Atpakaļ");
@@ -216,6 +219,7 @@ public class UserInterface {
           break;
         }
 
+        System.out.println("Stāvēšana ir aktivizēta!");
         startTimer(scanner, chosen);
         break;
       case 2:

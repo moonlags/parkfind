@@ -95,7 +95,7 @@ public class Rate implements CSVEncodable, TablePrintable {
       case Hour:
         double billableHours = Math.max(0.0, hours - freeHours);
         if (billableHours <= 0)
-          break;
+          return 0;
 
         double rawHours = billableHours / amount; // rate.amount() is the billing unit (hours)
         return (int) Math.ceil(rawHours); // round up to next whole payment unit
