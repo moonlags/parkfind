@@ -139,7 +139,7 @@ public class UserInterface {
 
         System.out.println("Jūs jau stāvējāt autostāvvietā ar adresi " + chosen.park().address() + " - "
             + HumanReadable.formatInterval(startTime, timeNow)
-            + " un esat samaksājāt " + String.format("%.2f", price) + " EUR!\nUzspiediet ENTER lai pabeigtu:");
+            + " un samaksājāt " + String.format("%.2f", price) + " EUR!\nUzspiediet ENTER lai pabeigtu:");
 
         // Sleep ~1 second between updates, but wake sooner if interrupted
         try {
@@ -236,16 +236,21 @@ public class UserInterface {
         break;
       case 4:
         clearConsole();
-        System.out.print("Vai Jums ir elektromašīna? (Jā/Nē): ");
-        if (scanner.nextLine().equals("Jā")) {
+        System.out.print("Vai Jums ir elektromašīna? (j/n): ");
+        String in = scanner.nextLine();
+        if (in.equalsIgnoreCase("j")) {
           curr.setAutoType(AutoType.Electro);
-        } else {
+          Color.success("Iestatījumi ir atjaunināti!");
+
+          saveUsers();
+        } else if (in.equalsIgnoreCase("n")) {
           curr.setAutoType(AutoType.Any);
+          Color.success("Iestatījumi ir atjaunināti!");
+
+          saveUsers();
+        } else {
+          Color.error("Nepareiza ievade!");
         }
-        Color.success("Iestatījumi ir atjaunināti!");
-
-        saveUsers();
-
         break;
       case 5:
         clearConsole();
@@ -400,11 +405,13 @@ public class UserInterface {
           break;
         }
 
-        System.out.print("Vai tiešām dzēst (Jā/Nē)?: ");
+        System.out.print("Vai tiešām dzēst (j/n)?: ");
         String y = scanner.nextLine();
 
-        if (!y.equals("Jā"))
+        if (!y.equalsIgnoreCase("j")) {
+          Color.error("Dzēšana ir apturēta!");
           break;
+        }
 
         users.remove(chosenUserEmail);
         Color.success("Lietotājs ir izdzēsts!");
@@ -549,11 +556,13 @@ public class UserInterface {
         return this::rateActionsPage;
       case 5:
         clearConsole();
-        System.out.print("Vai tiešām dzēst (Jā/Nē)?: ");
+        System.out.print("Vai tiešām dzēst (j/n)?: ");
         String y = scanner.nextLine();
 
-        if (!y.equals("Jā"))
+        if (!y.equalsIgnoreCase("j")) {
+          Color.error("Dzēšana ir apturēta!");
           break;
+        }
 
         parks.remove(chosenParkId);
         chosenParkId = -1;
