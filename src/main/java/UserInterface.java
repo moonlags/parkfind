@@ -170,9 +170,8 @@ public class UserInterface {
 
       ArrayList<Parking> temp = parkings.get(curr.email());
       Parking parking = new Parking(newId, startTime, finalEndTime,
-          totalPrice, curr.email(), chosen.park().id(),
-          chosen.rate().id());
-      parking.setPark(parks.get(parking.parkId()));
+          totalPrice, curr.email(),
+          chosen.rate().id(), chosen.park().id(), chosen.park().address());
 
       temp.add(parking);
       newId++;
@@ -280,9 +279,11 @@ public class UserInterface {
         }
 
         users.remove(curr.email());
+        parkings.remove(curr.email());
         Color.success("Jūsu konts ir dzests!");
 
         saveUsers();
+        saveParkings();
         return this::loginPage;
       case 7:
         clearConsole();
@@ -715,7 +716,7 @@ public class UserInterface {
         try {
           curr = User.login(scanner, users);
           clearConsole();
-          System.out.println("Jūs esat veiksmīgi atgriezusies sistēmā!");
+          Color.success("Jūs esat veiksmīgi atgriezusies sistēmā!");
 
           saveUsers();
 
@@ -902,8 +903,6 @@ public class UserInterface {
         if (parking.id() >= newId)
           newId = parking.id() + 1;
         ArrayList<Parking> temp = parkings.get(parking.email());
-
-        parking.setPark(parks.get(parking.parkId()));
         temp.add(parking);
         parkings.put(parking.email(), temp);
       }
@@ -994,8 +993,8 @@ public class UserInterface {
 
     int address_width = 6;
     for (Parking parking : parkings.get(email)) {
-      if (parking.park().address().length() > address_width)
-        address_width = parking.park().address().length();
+      if (parking.address().length() > address_width)
+        address_width = parking.address().length();
     }
 
     List<Integer> max_column_widths = List.of(address_width, 16, 16, 9);

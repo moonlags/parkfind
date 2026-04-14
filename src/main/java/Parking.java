@@ -11,10 +11,10 @@ public class Parking implements CSVEncodable, TablePrintable {
     private String email;
     private int parkId;
     private int rateId;
-    private Park park;
+    private String address;
 
     public Parking(int id, LocalDateTime startTime, LocalDateTime endTime, double price, String email, int parkId,
-            int rateId) {
+            int rateId, String address) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -22,22 +22,15 @@ public class Parking implements CSVEncodable, TablePrintable {
         this.email = email;
         this.parkId = parkId;
         this.rateId = rateId;
+        this.address = address;
     }
 
-    public Park park() {
-        return park;
-    }
-
-    public void setPark(Park park) {
-        this.park = park;
+    public String address() {
+        return address;
     }
 
     public int id() {
         return id;
-    }
-
-    public int parkId() {
-        return parkId;
     }
 
     public String email() {
@@ -46,8 +39,8 @@ public class Parking implements CSVEncodable, TablePrintable {
 
     // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību toCSV
     public String toCSV() {
-        return id + "," + startTime + "," + endTime + "," + price + "," + email + "," + parkId + ","
-                + rateId + "\n";
+        return id + "," + startTime + "," + endTime + "," + price + "," + email + "," + parkId + "," + rateId + ","
+                + address + "\n";
     }
 
     // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež
@@ -57,7 +50,7 @@ public class Parking implements CSVEncodable, TablePrintable {
                 .map(w -> "%-" + w + "s")
                 .collect(Collectors.joining(" | ", "| ", " |"));
 
-        return String.format(formatString, park.address(),
+        return String.format(formatString, address,
                 startTime.format(DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")),
                 endTime.format(DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy")), String.format("%.2f", price));
     }
@@ -69,8 +62,8 @@ public class Parking implements CSVEncodable, TablePrintable {
         String[] fields = csvdata.split(",");
 
         // Pārbauda, vai rindā ir pietiekami daudz datu lauku, lai izveidotu objektu
-        if (fields.length < 7) {
-            throw new Exception("Invalid csv fields: got " + fields.length + " expected 7");
+        if (fields.length < 8) {
+            throw new Exception("Invalid csv fields: got " + fields.length + " expected 8");
         }
 
         // Konvertē teksta vērtības uz atbilstošajiem datu tipiem
@@ -81,7 +74,8 @@ public class Parking implements CSVEncodable, TablePrintable {
         String email = fields[4];
         int parkId = Integer.valueOf(fields[5]);
         int rateId = Integer.valueOf(fields[6]);
+        String address = fields[7];
 
-        return new Parking(id, startTime, endTime, price, email, parkId, rateId);
+        return new Parking(id, startTime, endTime, price, email, parkId, rateId, address);
     }
 }

@@ -1,7 +1,7 @@
 .PHONY: build run
 
 build:
-	javac -d build ./src/main/java/*.java
+	mvn compile
 
-run: build
-	java -cp build Main
+run:
+	mvn exec:java -Dexec.mainClass="Main"

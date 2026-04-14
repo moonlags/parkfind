@@ -70,7 +70,7 @@ public class User implements CSVEncodable, TablePrintable {
     String pwd = scanner.nextLine();
 
     User user = users.get(email);
-    if (user == null || !user.password.equals(pwd)) {
+    if (user == null || !user.checkPassword(pwd)) {
       throw new Exception("Nepareizs e-pasts vai parole!");
     }
 
@@ -118,9 +118,8 @@ public class User implements CSVEncodable, TablePrintable {
       pwd2 = readLineOrExit(scanner, "Ievadi paroli vēlreiz: ");
     }
 
-    User user = new User(email, pwd, UserRole.User, phoneNumber, AutoType.Any);
+    User user = new User(email, Security.hashPassword(pwd), UserRole.User, phoneNumber, AutoType.Any);
     users.put(email, user);
-    Color.success("Reģistrācija veiksmīga!");
     return user;
   }
 
@@ -150,7 +149,7 @@ public class User implements CSVEncodable, TablePrintable {
   public void changePassword(Scanner scanner, HashMap<String, User> users) throws Exception {
     System.out.print("Ievadi pašreizējo paroli: ");
     String curr_pwd = scanner.nextLine();
-    if (!curr_pwd.equals(this.password)) {
+    if (!this.checkPassword(curr_pwd)) {
       throw new Exception("Nepareiza parole!");
     }
 
@@ -167,7 +166,7 @@ public class User implements CSVEncodable, TablePrintable {
       throw new Exception("Paroles nesakrīt");
     }
 
-    this.password = pwd;
+    this.password = Security.hashPassword(pwd);
     users.put(this.email, this);
   }
 
@@ -195,7 +194,7 @@ public class User implements CSVEncodable, TablePrintable {
   // funkcija checkPassword pieņem String tipa vērtību check un atgriež boolean
   // tipa vērtību
   public boolean checkPassword(String check) {
-    return password.equals(check);
+    return Security.checkPassword(check, this.password);
   }
 
   // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež
@@ -217,7 +216,7 @@ public class User implements CSVEncodable, TablePrintable {
       throw new Exception("Nepareizs csv datu skaits: saņēma " + fields.length + ", gaidīja vismaz 2");
     }
     String email = fields[0];
-    String name = fields[1];
+    String password = fields[1];
 
     UserRole role = UserRole.User;
     if (fields.length >= 3) {
@@ -234,6 +233,6 @@ public class User implements CSVEncodable, TablePrintable {
       autoType = AutoType.valueOf(fields[4]);
     }
 
-    return new User(email, name, role, phoneNumber, autoType);
+    return new User(email, password, role, phoneNumber, autoType);
   }
 }
