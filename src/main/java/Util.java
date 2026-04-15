@@ -1,5 +1,5 @@
+import java.time.Duration;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
 
 public class Util {
@@ -9,9 +9,23 @@ public class Util {
     }
 
     public static long hoursBetweenDates(LocalDateTime start, LocalDateTime end) {
-        long hours = ChronoUnit.HOURS.between(start, end);
-        if (hours == 0)
-            hours++;
-        return hours;
+        long minutes = Duration.between(start, end).toSeconds();
+        return (long) Math.ceil(minutes / 3600.0);
+    }
+
+    public static LocalDateTime calculateWindowEnd(Rate rate, LocalDateTime cursor, LocalDateTime endTime) {
+        LocalDateTime end;
+        if (rate.startTime().equals(rate.endTime())) {
+            end = endTime;
+        } else if (!rate.startTime().isAfter(rate.endTime())) {
+            end = cursor.toLocalDate().atTime(rate.endTime());
+        } else {
+            if (cursor.toLocalTime().isBefore(rate.endTime())) {
+                end = cursor.toLocalDate().atTime(rate.endTime());
+            } else {
+                end = cursor.toLocalDate().plusDays(1).atTime(rate.endTime());
+            }
+        }
+        return end.isAfter(endTime) ? endTime : end;
     }
 }

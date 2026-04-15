@@ -10,18 +10,29 @@ public class Parking implements CSVEncodable, TablePrintable {
     private double price;
     private String email;
     private int parkId;
-    private int rateId;
     private String address;
 
     public Parking(int id, LocalDateTime startTime, LocalDateTime endTime, double price, String email, int parkId,
-            int rateId, String address) {
+            String address) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
         this.price = price;
         this.email = email;
         this.parkId = parkId;
-        this.rateId = rateId;
+        this.address = address;
+    }
+
+    public Parking(int id, LocalDateTime startTime, LocalDateTime endTime, double price, String email, int parkId) {
+        this.id = id;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.price = price;
+        this.email = email;
+        this.parkId = parkId;
+    }
+
+    public void setAddress(String address) {
         this.address = address;
     }
 
@@ -33,14 +44,17 @@ public class Parking implements CSVEncodable, TablePrintable {
         return id;
     }
 
+    public int parkId() {
+        return parkId;
+    }
+
     public String email() {
         return email;
     }
 
     // funkcija toCSV nepieņem nevienu vērtību un atgriež String tipa vērtību toCSV
     public String toCSV() {
-        return id + "," + startTime + "," + endTime + "," + price + "," + email + "," + parkId + "," + rateId + ","
-                + address + "\n";
+        return id + "," + startTime + "," + endTime + "," + price + "," + email + "," + parkId + "\n";
     }
 
     // funkcija toTableRow pieņem List<Integer> tipa vērtību widths un atgriež
@@ -62,8 +76,8 @@ public class Parking implements CSVEncodable, TablePrintable {
         String[] fields = csvdata.split(",");
 
         // Pārbauda, vai rindā ir pietiekami daudz datu lauku, lai izveidotu objektu
-        if (fields.length < 8) {
-            throw new Exception("Invalid csv fields: got " + fields.length + " expected 8");
+        if (fields.length < 6) {
+            throw new Exception("Invalid csv fields: got " + fields.length + " expected 6");
         }
 
         // Konvertē teksta vērtības uz atbilstošajiem datu tipiem
@@ -73,9 +87,7 @@ public class Parking implements CSVEncodable, TablePrintable {
         double price = Double.valueOf(fields[3]);
         String email = fields[4];
         int parkId = Integer.valueOf(fields[5]);
-        int rateId = Integer.valueOf(fields[6]);
-        String address = fields[7];
 
-        return new Parking(id, startTime, endTime, price, email, parkId, rateId, address);
+        return new Parking(id, startTime, endTime, price, email, parkId);
     }
 }

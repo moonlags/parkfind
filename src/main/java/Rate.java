@@ -90,10 +90,10 @@ public class Rate implements CSVEncodable, TablePrintable {
     return autoType;
   }
 
-  public int getPayments(long hours, long days, long months) {
+  public int getPayments(long hours, long days, long months, boolean freeHoursAvailable) {
     switch (rateType) {
       case Hour:
-        double billableHours = Math.max(0.0, hours - freeHours);
+        double billableHours = freeHoursAvailable ? Math.max(0.0, hours - freeHours) : hours;
         if (billableHours <= 0)
           return 0;
 
@@ -110,12 +110,32 @@ public class Rate implements CSVEncodable, TablePrintable {
     throw new IllegalStateException("Unhandled RateType: " + rateType); // unreachable
   }
 
-  public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime) {
+  public double calculatePrice(LocalDateTime startTime, LocalDateTime endTime, boolean freeHours) {
     long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
     long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
     long hours = Util.hoursBetweenDates(startTime, endTime);
 
-    return price * getPayments(hours, days, months);
+    return price * getPayments(hours, days, months, freeHours);
+  }
+
+  public boolean worksInTime(LocalDateTime now) {
+    if (!Util.isDateAllowedByWeekdays(now.toLocalDate(), weekDays))
+      return false;
+
+    LocalTime time = now.toLocalTime();
+    LocalTime start = startTime;
+    LocalTime end = endTime;
+
+    if (start.equals(end))
+      return true; // Круглосуточный тариф
+
+    if (start.isBefore(end)) {
+      // Дневной тариф (напр. 08:00 - 20:00)
+      return !time.isBefore(start) && !time.isAfter(end);
+    } else {
+      // Ночной тариф (напр. 22:00 - 06:00)
+      return !time.isBefore(start) || !time.isAfter(end); // Используем ИЛИ
+    }
   }
 
   // funkcija enterNew pieņem Scanner tipa vērtību scanner, int tipa vērtību id,

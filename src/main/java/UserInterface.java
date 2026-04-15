@@ -1,8 +1,6 @@
 import java.util.TreeSet;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -77,7 +75,7 @@ public class UserInterface {
         address_width = res.park().address().length();
     }
 
-    List<Integer> max_column_widths = List.of(address_width, 12, 9);
+    List<Integer> max_column_widths = List.of(address_width, 25, 9);
     Table.printTable(columnNames, max_column_widths, options);
     System.out.println("Tika atrāsti " + options.size() + " varianti!");
 
@@ -101,8 +99,9 @@ public class UserInterface {
   private void startTimer(Scanner scanner, SearchResult chosen) {
     ExecutorService ex = Executors.newSingleThreadExecutor();
     LocalDateTime startTime = LocalDateTime.now();
+    LocalDateTime rateStartTime = startTime;
     AtomicBoolean stop = new AtomicBoolean(false);
-    final LocalDateTime[] finalEndTimeHolder = new LocalDateTime[1];
+    Rate currentRate = chosen.rate();
 
     // Task that blocks waiting for ENTER
     Future<?> reader = ex.submit(() -> {
@@ -116,33 +115,60 @@ public class UserInterface {
       }
     });
 
+    LocalDateTime now = LocalDateTime.now();
+
+    for (Rate rate : chosen.usedRates()) {
+      if (rate.worksInTime(now)) {
+        currentRate = rate;
+        break;
+      }
+    }
+
+    boolean firstRate = true;
+    double totalPrice = 0;
     try {
       while (!stop.get()) {
         LocalDateTime timeNow = LocalDateTime.now();
-        double price = chosen.rate().calculatePrice(startTime, timeNow);
 
         clearConsole();
 
-        // check rate availability based on current time
-        if (!chosen.rate().startTime().equals(chosen.rate().endTime())) {
-          if (timeNow.toLocalTime().isAfter(chosen.rate().endTime())
-              || timeNow.toLocalTime().isBefore(chosen.rate().startTime())
-              || !Util.isDateAllowedByWeekdays(timeNow.toLocalDate(), chosen.rate().weekDays())) {
-            Color.error("Izvēlētais tarifs tagad nestrādā!");
-            finalEndTimeHolder[0] = timeNow;
+        boolean isCurrentRateValid = currentRate.worksInTime(timeNow);
+        if (!isCurrentRateValid) {
+          boolean foundNewRate = false;
+          Rate oldRate = currentRate;
+
+          firstRate = false;
+
+          for (Rate rate : chosen.usedRates()) {
+            Rate nextRate = rate;
+
+            if (nextRate.worksInTime(timeNow)) {
+              totalPrice += oldRate.calculatePrice(rateStartTime, timeNow, false);
+
+              currentRate = nextRate;
+              rateStartTime = timeNow;
+              foundNewRate = true;
+              break;
+            }
+          }
+
+          if (!foundNewRate) {
+            Color.error("Neizdevās atrast nākamo piemēroto tarifu!");
             stop.set(true);
             break;
           }
         }
 
-        long hours = ChronoUnit.HOURS.between(startTime, timeNow) + 1;
-        if (hours <= chosen.rate().freeHours()) {
-          System.out.println("Tagad tiek izmantotas " + chosen.rate().freeHours() + " bezmaksas stundas!");
+        long hours = Util.hoursBetweenDates(rateStartTime, timeNow);
+        if (hours <= currentRate.freeHours() && hours != 0) {
+          System.out.println("Tagad tiek izmantotas " + currentRate.freeHours() + " bezmaksas stundas!");
         }
 
+        double displayPrice = totalPrice
+            + currentRate.calculatePrice(rateStartTime, timeNow, firstRate);
         System.out.println("Jūs jau stāvējāt autostāvvietā ar adresi " + chosen.park().address() + " - "
             + HumanReadable.formatInterval(startTime, timeNow)
-            + " un samaksājāt " + String.format("%.2f", price) + " EUR!\nUzspiediet ENTER lai pabeigtu:");
+            + " un samaksājāt " + String.format("%.2f", displayPrice) + " EUR!\nUzspiediet ENTER lai pabeigtu:");
 
         // Sleep ~1 second between updates, but wake sooner if interrupted
         try {
@@ -154,11 +180,10 @@ public class UserInterface {
       }
 
       // record final end time
-      LocalDateTime finalEndTime = finalEndTimeHolder[0] != null ? finalEndTimeHolder[0] : LocalDateTime.now();
+      LocalDateTime finalEndTime = LocalDateTime.now();
+      totalPrice += currentRate.calculatePrice(rateStartTime, finalEndTime, firstRate);
 
       clearConsole();
-
-      double totalPrice = chosen.rate().calculatePrice(startTime, finalEndTime);
 
       System.out.println("Jūs stāvējāt " + chosen.park().address() + " autostāvvieta: ");
       System.out.println(HumanReadable.formatInterval(startTime, finalEndTime));
@@ -170,8 +195,7 @@ public class UserInterface {
 
       ArrayList<Parking> temp = parkings.get(curr.email());
       Parking parking = new Parking(newId, startTime, finalEndTime,
-          totalPrice, curr.email(),
-          chosen.rate().id(), chosen.park().id(), chosen.park().address());
+          totalPrice, curr.email(), chosen.park().id(), chosen.park().address());
 
       temp.add(parking);
       newId++;
@@ -204,7 +228,7 @@ public class UserInterface {
 
         ArrayList<SearchResult> results;
         try {
-          results = findBestParkings();
+          results = findBestParks();
         } catch (Exception e) {
           Color.error(e.getMessage());
           break;
@@ -738,7 +762,7 @@ public class UserInterface {
     return this::loginPage;
   }
 
-  public ArrayList<SearchResult> findBestParkings() throws Exception {
+  public ArrayList<SearchResult> findBestParks() throws Exception {
     System.out
         .print(
             "Ievadi laiku un datumu, kad plāno atstāt automašīnu autostāvvietā (piem. 09:49 08.04.2026)\nVai nospied Enter, lai ievadītu pašreizejo datumu: ");
@@ -793,49 +817,23 @@ public class UserInterface {
         parksInSameDistrict.add(p);
     }
 
-    long months = ChronoUnit.MONTHS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
-    long days = ChronoUnit.DAYS.between(startTime.toLocalDate(), endTime.toLocalDate()) + 1;
-    long hours = Util.hoursBetweenDates(startTime, endTime);
-
     TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
+
     for (Park park : parksInSameDistrict) {
       if (!rates.containsKey(park.id()))
         continue;
 
+      // Filter to rates compatible with this autoType
+      ArrayList<Rate> compatibleRates = new ArrayList<>();
       for (Rate rate : rates.get(park.id())) {
-
         if (rate.autoType() == AutoType.Electro && curr.autoType() != AutoType.Electro)
           continue;
+        compatibleRates.add(rate);
+      }
 
-        byte rateWeekdays = rate.weekDays(); // e.g., 00000101b means Monday+Wednesday
-        LocalDate cur = startTime.toLocalDate();
-        LocalDate end = endTime.toLocalDate();
-        // iterate each date covered by the booking; stop if any date not allowed
-        boolean allowedWeekdays = true;
-        while (!cur.isAfter(end)) {
-          if (!Util.isDateAllowedByWeekdays(cur, rateWeekdays)) {
-            allowedWeekdays = false;
-            break;
-          }
-          cur = cur.plusDays(1);
-        }
-
-        if (!allowedWeekdays)
-          continue;
-
-        if (!rate.startTime().equals(rate.endTime())) {
-          boolean startOutside = startTime.toLocalTime().isBefore(rate.startTime());
-          boolean endOutside = endTime.toLocalTime().isAfter(rate.endTime());
-          if (startOutside || endOutside)
-            continue;
-          else if (startTime.toLocalTime().isAfter(endTime.toLocalTime())
-              && !rate.startTime().isAfter(rate.endTime())) { // night rate
-            continue;
-          }
-        }
-
-        double price = rate.price() * rate.getPayments(hours, days, months);
-        results.add(new SearchResult(park, rate, price));
+      SearchResult res = findBestParksRecursive(compatibleRates, startTime, endTime, 1);
+      if (res != null) {
+        results.add(new SearchResult(park, res.usedRates().get(0), res.price(), res.usedRates()));
       }
     }
 
@@ -845,6 +843,64 @@ public class UserInterface {
       top5.add(it.next());
 
     return top5;
+  }
+
+  private SearchResult findBestParksRecursive(ArrayList<Rate> compatibleRates, LocalDateTime cursor,
+      LocalDateTime endTime, int depth) {
+    if (!cursor.isBefore(endTime)) {
+      return new SearchResult(null, 0.0, new ArrayList<>());
+    } else if (depth >= 5) {
+      return null;
+    }
+
+    SearchResult bestResult = null;
+    double bestPrice = Double.MAX_VALUE;
+
+    for (Rate rate : compatibleRates) {
+      // Check weekday is allowed for this date
+      if (!Util.isDateAllowedByWeekdays(cursor.toLocalDate(), rate.weekDays()))
+        continue;
+
+      // Check time window: if start==end, rate has no time restriction
+      if (!rate.startTime().equals(rate.endTime())) {
+        boolean inWindow;
+        if (!rate.startTime().isAfter(rate.endTime())) {
+          // Normal window e.g. 08:00-20:00
+          inWindow = !cursor.toLocalTime().isBefore(rate.startTime())
+              && cursor.toLocalTime().isBefore(rate.endTime());
+        } else {
+          // Overnight window e.g. 20:00-08:00
+          inWindow = !cursor.toLocalTime().isBefore(rate.startTime())
+              || cursor.toLocalTime().isBefore(rate.endTime());
+        }
+        if (!inWindow)
+          continue;
+      }
+
+      // Compute the end of this rate's window for the current segment
+      LocalDateTime candidateEnd = Util.calculateWindowEnd(rate, cursor, endTime);
+      double price = rate.calculatePrice(cursor, candidateEnd, depth == 1);
+
+      SearchResult nextPart = findBestParksRecursive(compatibleRates, candidateEnd, endTime, depth++);
+      if (nextPart == null)
+        continue;
+
+      double combinedPrice = price + nextPart.price();
+      if (combinedPrice < bestPrice) {
+        bestPrice = combinedPrice;
+
+        ArrayList<Rate> allUsedRates = new ArrayList<>();
+        allUsedRates.add(rate);
+        allUsedRates.addAll(nextPart.usedRates());
+
+        bestResult = new SearchResult(null, combinedPrice, allUsedRates);
+      }
+    }
+
+    if (bestResult == null)
+      return null;
+
+    return bestResult;
   }
 
   // funkcija loadUsers neko nepieņem un neko neatgriež
@@ -896,6 +952,8 @@ public class UserInterface {
     try {
       ArrayList<Parking> parkingArray = parkingFile.loadAll();
       for (Parking parking : parkingArray) {
+        parking.setAddress(parks.get(parking.parkId()).address());
+
         if (!parkings.containsKey(parking.email())) {
           parkings.put(parking.email(), new ArrayList<>());
         }

@@ -20,14 +20,14 @@ public class HumanReadable {
         long seconds = duration.minusHours(hours).minusMinutes(minutes).getSeconds();
 
         StringBuilder sb = new StringBuilder();
-        append(sb, years, "gadus");
-        append(sb, months, "menēšus");
-        append(sb, days, "dienas");
-        append(sb, hours, "stundas");
-        append(sb, minutes, "minutes");
-        append(sb, seconds, "sekundes");
+        append(sb, years, "g");
+        append(sb, months, "m");
+        append(sb, days, "d");
+        append(sb, hours, "st");
+        append(sb, minutes, "min");
+        append(sb, seconds, "sek");
 
-        String result = sb.length() == 0 ? "0 sekundes" : sb.toString().trim();
+        String result = sb.length() == 0 ? "0 sek" : sb.toString().trim();
         // make nicer: replace last comma with " and"
         int lastComma = result.lastIndexOf(',');
         if (lastComma != -1)
