@@ -1029,7 +1029,7 @@ public class UserInterface {
   // funkcija run neko nepieņem un neko neatgriež
   public void run() {
     clearConsole();
-    System.out.println("Esi sveicinats Autostāvvietu meklēšanā!");
+    System.out.println("Esi sveicināts Autostāvvietu meklēšanā!");
 
     loadUsers();
     loadParks();
