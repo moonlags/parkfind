@@ -201,6 +201,10 @@ public class Rate implements CSVEncodable, TablePrintable {
       }
     }
 
+    if (freeHours < 0) {
+      throw new Exception("Bezmaksas stundas daudzums nevar būt negatīvs!");
+    }
+
     System.out.print(
         "Ievadi laiku, kad tarifs saka darboties (piem. 05:34)\nVai nospied Enter, lai izslēgtu sākuma laika ierobiežojumus: ");
     LocalTime startTime = LocalTime.MIDNIGHT;

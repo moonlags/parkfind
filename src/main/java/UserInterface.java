@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -813,11 +814,13 @@ public class UserInterface {
 
     ArrayList<Park> parksInSameDistrict = new ArrayList<>();
     for (Park p : parks.values()) {
-      if (p.district().equals(district))
+      if (p.district().equals(district)) {
+        System.out.println(p.address());
         parksInSameDistrict.add(p);
+      }
     }
 
-    TreeSet<SearchResult> results = new TreeSet<>(Comparator.comparing(SearchResult::price));
+    PriorityQueue<SearchResult> results = new PriorityQueue<>(Comparator.comparing(SearchResult::price));
 
     for (Park park : parksInSameDistrict) {
       if (!rates.containsKey(park.id()))
@@ -838,9 +841,8 @@ public class UserInterface {
     }
 
     ArrayList<SearchResult> top5 = new ArrayList<>(5);
-    Iterator<SearchResult> it = results.iterator();
-    for (int i = 0; i < 5 && it.hasNext(); i++)
-      top5.add(it.next());
+    for (int i = 0; i < 5 && !results.isEmpty(); i++)
+      top5.add(results.poll());
 
     return top5;
   }
