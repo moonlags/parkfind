@@ -1,11 +1,9 @@
-import java.util.TreeSet;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -248,7 +246,7 @@ public class UserInterface {
         break;
       case 2:
         clearConsole();
-        if (!parkings.containsKey(curr.email())) {
+        if (!parkings.containsKey(curr.email()) || parkings.get(curr.email()).isEmpty()) {
           Color.error("Jums vēl nav vēstures!");
           break;
         }
