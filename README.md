@@ -1,6 +1,7 @@
 # Parkfind
 
 A system that allows car drivers in Riga easily find a cheapest parking place in a given period of time.
+Program was developed during short internship at [Riga State Technical School](https://rvt.lv).
 
 ![Screenshot](docs/screenshot.jpg)
 
